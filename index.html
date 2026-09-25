@@ -474,5 +474,6 @@ pintarRuta();
 siguienteSinMarcar();
 $("#descargar").addEventListener("click", descargar);
 $("#sincronizar").hidden = !window.claude;
+$("#descargar").hidden = !!window.claude;
 pedirDb().then(db => { estado.db = db; if (db) sincronizar(); });
 </script>
