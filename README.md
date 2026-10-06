@@ -37,6 +37,13 @@ Sitio: https://daviddelavegaunam.github.io/marcador-salones-fc/
 
 **Estoy aquí.** Cuando pases por un punto reconocible (una puerta, una esquina, la fuente), toca **Estoy aquí** y luego tu posición real en el mapa. El tramo desde el ancla anterior se gira y escala para caer ahí. **Los metros medidos no cambian:** solo cambia el dibujo. Hazlo al cambiar de piso y después de dar vueltas.
 
+**Red del campus y avance.** Sobre el mapa se dibujan los andadores de la red de circulación de la Facultad (las líneas rojas de la tesis): 97 tramos, unos 2.1 km. Cada tramo cambia de color según lo que ya caminaste, sumando todos los días:
+- **rojo punteado:** falta;
+- **naranja:** a medias;
+- **verde:** recorrido (al menos 80 % de su largo con tu rastro a 6 m o menos).
+
+Debajo de los pisos, un contador dice cuántos andadores llevas. Con zoom aparecen los nombres de los cruces (`C12`, `C39`…) para ubicar qué tramo falta. El botón **Red** la muestra u oculta. El color solo sirve para orientarse; la medida que entra a la tesis la decide `esqueleto_medido.py`. Para actualizar la red después de cambiar el esqueleto: `python esqueleto_medido.py --red-app`.
+
 **Descartar tramo.** Si diste vueltas buscando un lugar, toca **Descartar tramo**. Se tiran los pasos desde el último nodo y la posición regresa a él. Camina de vuelta a ese nodo y sigue desde ahí.
 
 **Deshacer.** Revierte la última acción (nodo, tramo, ancla, descarte o piso). Los pasos que diste después se conservan.
