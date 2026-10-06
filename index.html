@@ -1,4 +1,9 @@
-<title>Marcador de Salones</title>
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Recorridos FC</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Didact+Gothic&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600;700&display=swap">
@@ -24,275 +29,527 @@
   --listo: #6ed39b; --listo-suave: #16301f; --aviso: #f2a65e; --aviso-suave: #36261a; --alto: #ff8a80;
 }
 * { box-sizing: border-box; }
-html, body { height: 100%; }
-body {
-  margin: 0; background: var(--suelo); color: var(--tinta);
-  font: 400 16px/1.45 var(--texto); padding-inline: 16px; padding-block: 12px 28px;
-  -webkit-text-size-adjust: 100%;
-}
-.marco { max-width: 560px; margin-inline: auto; display: grid; gap: 14px; }
-header { display: grid; gap: 2px; }
-.institucion { font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--tenue); }
-h1 { font: 400 27px/1.1 var(--display); margin: 0; }
-.tarjeta { background: var(--superficie); border: 1px solid var(--linea); border-radius: 12px; padding: 14px; display: grid; gap: 12px; }
-label { display: grid; gap: 5px; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--tenue); }
-select, input, button { font: inherit; color: inherit; }
-select, input[type="search"] {
-  width: 100%; padding: 12px 10px; border: 1px solid var(--linea); border-radius: 8px;
-  background: var(--superficie-2); font-size: 17px;
-}
-.fila { display: flex; gap: 8px; flex-wrap: wrap; }
-.fila > * { flex: 1 1 auto; }
+html, body { margin: 0; }
+body { background: var(--suelo); color: var(--tinta); font: 400 16px/1.45 var(--texto); -webkit-text-size-adjust: 100%; padding-bottom: 28px; }
+.barra { position: sticky; top: 0; z-index: 3; background: var(--superficie); border-bottom: 1px solid var(--linea); padding: 8px 16px; }
+.estado { display: flex; gap: 6px; flex-wrap: wrap; max-width: 720px; margin-inline: auto; }
 .chip {
-  display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px;
-  background: var(--superficie-2); border: 1px solid var(--linea); font-size: 13px; color: var(--tenue);
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px;
+  background: var(--superficie-2); border: 1px solid var(--linea); font: 500 13px var(--mono); color: var(--tenue);
   font-variant-numeric: tabular-nums;
 }
+.chip.fuerte { background: var(--acento); border-color: var(--acento); color: var(--acento-tinta); }
 .chip.bien { background: var(--listo-suave); border-color: var(--listo); color: var(--listo); }
 .chip.regular { background: var(--aviso-suave); border-color: var(--aviso); color: var(--aviso); }
 .chip.mal { background: var(--aviso-suave); border-color: var(--alto); color: var(--alto); }
-.marcar {
-  width: min(260px, 72vw); aspect-ratio: 1; margin-inline: auto; border-radius: 50%;
-  border: 0; background: var(--acento); color: var(--acento-tinta); cursor: pointer;
-  font: 400 34px/1.1 var(--display); letter-spacing: 0.02em;
-  display: grid; align-content: center; justify-items: center; gap: 6px;
-  box-shadow: 0 10px 28px rgb(29 63 148 / 0.28); touch-action: manipulation;
+.mapa-caja { position: relative; height: 54vh; min-height: 300px; background: #dfe3e8; border-bottom: 1px solid var(--linea); }
+#mapa { width: 100%; height: 100%; display: block; touch-action: none; user-select: none; -webkit-user-select: none; }
+#mapa .rastro { fill: none; stroke-width: 3.5; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+#mapa .arista { stroke: #1b2233; stroke-width: 1.6; vector-effect: non-scaling-stroke; opacity: 0.7; }
+#mapa .nodo { stroke: #ffffff; stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+#mapa .ancla { fill: none; stroke: #111; stroke-width: 1.4; vector-effect: non-scaling-stroke; }
+#mapa .yo { fill: #b3261e; stroke: #fff; stroke-width: 2; vector-effect: non-scaling-stroke; }
+#mapa .rumbo { stroke: #b3261e; stroke-width: 3; vector-effect: non-scaling-stroke; stroke-linecap: round; }
+#mapa .tenue { opacity: 0.15; }
+#mapa .gps { fill: rgb(168 79 11 / 0.14); stroke: #a84f0b; stroke-width: 1.4; vector-effect: non-scaling-stroke; }
+#mapa .gps.ok { fill: rgb(26 127 75 / 0.16); stroke: #1a7f4b; }
+#mapa .gps-punto { fill: #1a7f4b; stroke: #fff; stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+#mapa text { font-family: var(--mono); fill: #111; paint-order: stroke; stroke: #fff; stroke-width: 3px; vector-effect: non-scaling-stroke; }
+.flotantes { position: absolute; right: 8px; top: 8px; display: grid; gap: 6px; justify-items: end; }
+.flotantes button, .flotantes select {
+  font: 600 15px var(--texto); padding: 10px 12px; border-radius: 10px; border: 1px solid var(--linea);
+  background: var(--superficie); color: var(--tinta); box-shadow: 0 2px 8px rgb(0 0 0 / 0.18); touch-action: manipulation;
 }
-.marcar:disabled { opacity: 0.45; box-shadow: none; }
-.marcar small { font: 500 13px var(--mono); opacity: 0.85; text-transform: none; letter-spacing: 0; }
-.marcar:active { transform: scale(0.97); }
-@media (prefers-reduced-motion: reduce) { .marcar:active { transform: none; } }
-.segmento { display: flex; gap: 0; border: 1px solid var(--linea); border-radius: 8px; overflow: hidden; }
-.segmento button { flex: 1; padding: 10px 8px; border: 0; background: var(--superficie-2); cursor: pointer; font-size: 15px; }
+.flotantes #b-aqui { background: var(--acento); color: var(--acento-tinta); border-color: var(--acento); }
+.flotantes #b-aqui[aria-pressed="true"] { background: var(--alto); border-color: var(--alto); color: #fff; }
+.modo { position: absolute; left: 8px; right: 8px; bottom: 8px; margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--alto); color: #fff; font-weight: 600; text-align: center; }
+.marco { max-width: 720px; margin-inline: auto; padding: 12px 16px 0; display: grid; gap: 12px; }
+.tarjeta { background: var(--superficie); border: 1px solid var(--linea); border-radius: 12px; padding: 12px; display: grid; gap: 10px; }
+details.tarjeta > summary { cursor: pointer; font: 400 18px var(--display); }
+label { display: grid; gap: 4px; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--tenue); }
+label.casilla { display: flex; align-items: center; gap: 8px; text-transform: none; letter-spacing: 0; font-size: 15px; color: var(--tinta); }
+label.casilla input { width: 22px; height: 22px; }
+select, input, button { font: inherit; color: inherit; }
+select, input[type="text"], input[type="number"] {
+  width: 100%; padding: 11px 10px; border: 1px solid var(--linea); border-radius: 8px; background: var(--superficie-2); font-size: 17px;
+}
+.fila { display: flex; gap: 8px; flex-wrap: wrap; }
+.fila > * { flex: 1 1 auto; }
+.boton { padding: 13px 12px; border: 1px solid var(--linea); border-radius: 10px; background: var(--superficie-2); cursor: pointer; font-size: 16px; font-weight: 600; touch-action: manipulation; }
+.boton.primario { background: var(--acento); color: var(--acento-tinta); border-color: var(--acento); }
+.boton.peligro { color: var(--alto); }
+.segmento { display: flex; border: 1px solid var(--linea); border-radius: 10px; overflow: hidden; }
+.segmento button { flex: 1; padding: 13px 4px; border: 0; border-right: 1px solid var(--linea); background: var(--superficie-2); cursor: pointer; font-size: 14px; font-weight: 600; touch-action: manipulation; }
+.segmento button:last-child { border-right: 0; }
 .segmento button[aria-pressed="true"] { background: var(--acento); color: var(--acento-tinta); }
-.boton { padding: 10px 12px; border: 1px solid var(--linea); border-radius: 8px; background: var(--superficie-2); cursor: pointer; font-size: 15px; }
-.boton:hover { border-color: var(--acento); }
-.avance { height: 8px; border-radius: 999px; background: var(--superficie-2); overflow: hidden; border: 1px solid var(--linea); }
-.avance div { height: 100%; background: var(--listo); }
-.lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 45vh; overflow: auto; }
-.lista li {
-  display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center;
-  padding: 8px 10px; border: 1px solid var(--linea); border-radius: 8px; background: var(--superficie-2); font-size: 14px;
+.marcar {
+  width: 100%; padding: 18px 12px; border-radius: 14px; border: 0; background: var(--acento); color: var(--acento-tinta);
+  font: 400 26px/1.1 var(--display); display: grid; gap: 4px; justify-items: center; cursor: pointer; touch-action: manipulation;
 }
-.lista b { font-weight: 600; }
-.lista small { color: var(--tenue); font: 400 12px var(--mono); }
-.borrar { border: 0; background: none; color: var(--alto); cursor: pointer; font-size: 18px; line-height: 1; padding: 4px 6px; }
-.nota { margin: 0; font-size: 13.5px; color: var(--tenue); }
+.marcar small { font: 500 13px var(--mono); opacity: 0.85; }
+.marcar:active, .boton:active { transform: scale(0.98); }
+@media (prefers-reduced-motion: reduce) { .marcar:active, .boton:active { transform: none; } }
+.nota { margin: 0; font-size: 14px; color: var(--tenue); }
 .nota.aviso { padding: 9px 11px; border-radius: 8px; background: var(--aviso-suave); color: var(--tinta); border-left: 3px solid var(--aviso); }
-.ruta { width: 100%; aspect-ratio: 1; background: var(--superficie-2); border: 1px solid var(--linea); border-radius: 8px; display: block; }
-.ruta polyline { fill: none; stroke: var(--acento); stroke-width: 2; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
-.ruta circle.yo { fill: var(--alto); }
-.ruta circle.salon { fill: var(--listo); }
-.ruta text { fill: var(--tinta); font: 500 11px var(--mono); }
-.ajustes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.ajustes input { width: 100%; padding: 10px; border: 1px solid var(--linea); border-radius: 8px; background: var(--superficie-2); font-size: 16px; }
-.dato { font: 500 13px var(--mono); color: var(--tenue); font-variant-numeric: tabular-nums; }
+.lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.lista li { padding: 8px 10px; border: 1px solid var(--linea); border-radius: 8px; background: var(--superficie-2); font-size: 14px; }
+.lista small { color: var(--tenue); font: 400 12px var(--mono); }
+.ajustes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: end; }
+.leyenda { width: 100%; height: auto; display: block; background: #fff; border-radius: 8px; }
+dialog { width: min(560px, calc(100vw - 24px)); max-height: calc(100vh - 24px); border: 1px solid var(--linea); border-radius: 14px; background: var(--superficie); color: var(--tinta); padding: 14px; }
+dialog::backdrop { background: rgb(0 0 0 / 0.45); }
+dialog form { display: grid; gap: 10px; }
+dialog h2 { margin: 0; font: 400 22px var(--display); }
+fieldset { border: 1px solid var(--linea); border-radius: 10px; padding: 8px 10px; margin: 0; display: grid; gap: 4px; }
+legend { font-size: 13px; color: var(--tenue); padding-inline: 4px; }
+.opcion { display: flex; align-items: center; gap: 10px; padding: 9px 4px; font-size: 15px; border-bottom: 1px solid var(--linea); }
+.opcion:last-child { border-bottom: 0; }
+.opcion input { width: 22px; height: 22px; flex: none; }
+.opcion small { color: var(--tenue); font: 400 12px var(--mono); }
+dialog menu { display: flex; gap: 8px; margin: 0; padding: 0; }
+dialog menu button { flex: 1; }
 :focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
 </style>
+</head>
+<body>
+<header class="barra">
+  <div class="estado" aria-live="polite">
+    <span class="chip fuerte" id="c-piso">PB</span>
+    <span class="chip fuerte" id="c-tramo">sin tramo</span>
+    <span class="chip" id="c-rumbo">rumbo —</span>
+    <span class="chip" id="c-sensores">sensores apagados</span>
+    <span class="chip" id="c-gps" hidden>GPS</span>
+  </div>
+</header>
 
-<div class="marco">
-  <header>
-    <span class="institucion">Facultad de Ciencias · UNAM</span>
-    <h1>Marcador de salones</h1>
-    <span class="dato" id="resumen">498 lugares del catálogo</span>
-  </header>
+<div class="mapa-caja">
+  <svg id="mapa" role="img" aria-label="Mapa de la Facultad con el recorrido" viewBox="0 0 1010 752" preserveAspectRatio="xMidYMid meet">
+    <defs><clipPath id="recorte"><rect x="0" y="0" width="1010" height="752"/></clipPath></defs>
+    <image href="mapa_ciencias.png" x="0" y="0" width="1417" height="752" clip-path="url(#recorte)"/>
+    <g id="capa"></g>
+  </svg>
+  <div class="flotantes">
+    <button type="button" id="b-aqui" aria-pressed="false">Estoy aquí</button>
+    <button type="button" id="b-gps" hidden>Usar GPS como ancla</button>
+    <button type="button" id="b-centrar">Centrar en mí</button>
+    <select id="filtro" aria-label="Pisos visibles"></select>
+  </div>
+  <p class="modo" id="modo" hidden></p>
+</div>
+
+<main class="marco">
+  <p class="nota aviso" id="aviso">Toca Iniciar, luego toca en el mapa el lugar donde estás parado.</p>
+  <div class="fila">
+    <button type="button" class="boton primario" id="b-iniciar">Iniciar</button>
+    <button type="button" class="boton" id="b-deshacer">Deshacer</button>
+  </div>
 
   <section class="tarjeta">
-    <div class="fila">
-      <button type="button" class="boton" id="iniciar">Iniciar recorrido</button>
-      <button type="button" class="boton" id="nuevo">Nuevo recorrido</button>
-    </div>
-    <svg class="ruta" id="ruta" viewBox="-10 -10 20 20" role="img" aria-label="Ruta caminada"></svg>
-    <div class="fila">
-      <span class="chip" id="sensores">sensores apagados</span>
-      <span class="chip" id="pasos">0 pasos · 0.0 m</span>
-      <span class="chip" id="rumbo">rumbo —</span>
-    </div>
+    <div class="segmento" id="tramos" role="group" aria-label="Tipo de tramo"></div>
+    <div class="segmento" id="pisos" role="group" aria-label="Piso actual"></div>
   </section>
 
   <section class="tarjeta">
-    <label for="edificio">Edificio
+    <label for="edificio">Edificio (número del mapa)
       <select id="edificio"></select>
     </label>
-    <label for="salon">Salón
-      <select id="salon"></select>
+    <label for="lugar">Lugar
+      <select id="lugar"></select>
     </label>
-    <div class="avance"><div id="barra" style="width:0%"></div></div>
+    <label class="casilla"><input type="checkbox" id="via-activa"> Se entra por otro lugar</label>
+    <select id="via" hidden aria-label="Nodo por el que se entra"></select>
+    <button type="button" class="marcar" id="b-lugar">Marcar lugar<small id="lugar-pie">inicia el recorrido primero</small></button>
     <div class="fila">
-      <span class="chip" id="avance-texto">0 de 0 marcados</span>
-      <button type="button" class="boton" id="siguiente">Siguiente sin marcar</button>
+      <button type="button" class="boton" id="b-punto">Punto aquí</button>
+      <button type="button" class="boton peligro" id="b-descartar">Descartar tramo</button>
     </div>
   </section>
 
-  <button type="button" class="marcar" id="marcar">Marcar<small id="marcar-pie">inicia el recorrido primero</small></button>
-
   <section class="tarjeta">
-    <div class="segmento" role="group" aria-label="Dónde estás parado">
-      <button type="button" id="donde-puerta" aria-pressed="true">En la puerta</button>
-      <button type="button" id="donde-dentro" aria-pressed="false">Dentro</button>
-    </div>
-    <p class="nota" id="ultima">Párate en la entrada del edificio, toca Iniciar recorrido y camina con el teléfono al frente, como si leyeras. Al llegar a cada salón, elígelo y toca Marcar.</p>
-    <p class="nota aviso" id="pendientes" hidden></p>
+    <strong style="font:400 18px var(--display)">Últimos registros</strong>
+    <ul class="lista" id="ultimos"></ul>
   </section>
 
-  <section class="tarjeta">
-    <strong style="font:400 19px var(--display)">Ajuste del paso</strong>
+  <details class="tarjeta">
+    <summary>Leyenda del mapa</summary>
+    <svg class="leyenda" viewBox="1012 18 402 734" role="img" aria-label="Leyenda del mapa oficial">
+      <image href="mapa_ciencias.png" x="0" y="0" width="1417" height="752"/>
+    </svg>
+  </details>
+
+  <details class="tarjeta">
+    <summary>Ajustes y calibración</summary>
     <div class="ajustes">
       <label for="zancada">Largo de paso (m)
-        <input id="zancada" type="number" inputmode="decimal" min="0.3" max="1.2" step="0.01" value="0.70">
+        <input id="zancada" type="number" inputmode="decimal" min="0.3" max="1.5" step="0.01">
       </label>
       <label for="umbral">Sensibilidad (m/s²)
-        <input id="umbral" type="number" inputmode="decimal" min="0.3" max="4" step="0.1" value="1.2">
+        <input id="umbral" type="number" inputmode="decimal" min="0.3" max="4" step="0.1">
+      </label>
+      <label for="declinacion">Declinación (°)
+        <input id="declinacion" type="number" inputmode="decimal" min="-30" max="30" step="0.1">
       </label>
       <label for="conocida">Distancia conocida (m)
         <input id="conocida" type="number" inputmode="decimal" min="1" step="0.5" value="10">
       </label>
-      <label>&nbsp;
-        <button type="button" class="boton" id="calibrar">Calibrar</button>
-      </label>
     </div>
-    <p class="nota">Para calibrar: mide una distancia en el pasillo (por ejemplo, 10 m), toca Calibrar, camínala y vuelve a tocar Calibrar. El largo de paso se ajusta solo. Si no cuenta pasos, baja la sensibilidad; si cuenta de más, súbela.</p>
-  </section>
+    <button type="button" class="boton" id="b-calibrar">Calibrar</button>
+    <p class="nota">Para calibrar: toca Calibrar, camina la distancia conocida y vuelve a tocar. Si no cuenta pasos, baja la sensibilidad; si cuenta de más, súbela. La declinación convierte el rumbo magnético en verdadero (4.5° en CDMX).</p>
+    <button type="button" class="boton" id="b-nuevo">Nuevo recorrido</button>
+  </details>
 
-  <section class="tarjeta">
+  <details class="tarjeta">
+    <summary>Datos</summary>
+    <p class="nota" id="conteo"></p>
     <div class="fila">
-      <strong style="flex:1 1 100%; font:400 19px var(--display)">Marcas tomadas</strong>
-      <span class="chip" id="guardado">0 marcas</span>
-      <button type="button" class="boton" id="descargar">Descargar CSV</button>
-      <button type="button" class="boton" id="copiar">Copiar todo</button>
-      <button type="button" class="boton" id="sincronizar">Sincronizar</button>
+      <button type="button" class="boton" data-csv="nodos">nodos.csv</button>
+      <button type="button" class="boton" data-csv="aristas">aristas.csv</button>
+      <button type="button" class="boton" data-csv="rastro">rastro.csv</button>
     </div>
-    <ul class="lista" id="marcas"></ul>
-    <p class="nota">Cada marca guarda salón, nivel, posición (x, y) en metros desde donde iniciaste el recorrido, y los pasos y metros caminados desde la marca anterior. Se guardan primero en este teléfono, así que puedes seguir sin señal.</p>
-  </section>
-</div>
+    <div class="fila">
+      <button type="button" class="boton" id="b-respaldo">Respaldo JSON</button>
+      <button type="button" class="boton" id="b-importar">Importar respaldo</button>
+      <input type="file" id="archivo" accept="application/json,.json" hidden>
+    </div>
+    <p class="nota">Todo se guarda en este teléfono. Descarga el respaldo JSON al final de cada día: sirve para pasar el grafo a otro teléfono o recuperarlo si se borra el navegador.</p>
+  </details>
+</main>
 
-<script type="application/json" id="catalogo">[{"id": 8, "nombre": "Amoxcalli", "lugares": [{"id": 619, "nombre": "Adquisiciones y Procesos Técnicos", "nivel": "Vestíbulo", "piso": 0}, {"id": 625, "nombre": "Anfiteatro Alfredo Barrera", "nivel": "Vestíbulo", "piso": 0}, {"id": 620, "nombre": "Audiovisuales", "nivel": "Vestíbulo", "piso": 0}, {"id": 623, "nombre": "Auditorio Carlos Graef", "nivel": "Vestíbulo", "piso": 0}, {"id": 624, "nombre": "Aula Magna Leonila Vázquez", "nivel": "Vestíbulo", "piso": 0}, {"id": 456, "nombre": "Aula Sotero Prieto I", "nivel": "Vestíbulo", "piso": 0}, {"id": 480, "nombre": "Aula Sotero Prieto II", "nivel": "Vestíbulo", "piso": 0}, {"id": 481, "nombre": "Aula Sotero Prieto III", "nivel": "Vestíbulo", "piso": 0}, {"id": 190, "nombre": "Coordinación de los Servicios Bibliotecarios", "nivel": "Vestíbulo", "piso": 0}, {"id": 622, "nombre": "Jefe de Servicios Amoxcalli", "nivel": "Vestíbulo", "piso": 0}, {"id": 621, "nombre": "Pakte", "nivel": "Vestíbulo", "piso": 0}, {"id": 628, "nombre": "Coordinación de Actividades Culturales", "nivel": "Primer Piso", "piso": 1}, {"id": 627, "nombre": "Estancia de Bibliotecarios I", "nivel": "Primer Piso", "piso": 1}, {"id": 626, "nombre": "Sala de Estudios con Acervo de Matemáticas", "nivel": "Primer Piso", "piso": 1}, {"id": 631, "nombre": "Aula de Cómputo 5", "nivel": "Segundo Piso", "piso": 2}, {"id": 632, "nombre": "Aula de Cómputo 6", "nivel": "Segundo Piso", "piso": 2}, {"id": 633, "nombre": "Aula de Cómputo 8", "nivel": "Segundo Piso", "piso": 2}, {"id": 637, "nombre": "Estancia de Bibliotecarios II", "nivel": "Segundo Piso", "piso": 2}, {"id": 640, "nombre": "Fondo Reservado", "nivel": "Segundo Piso", "piso": 2}, {"id": 629, "nombre": "Hemeroteca", "nivel": "Segundo Piso", "piso": 2}, {"id": 636, "nombre": "Jefatura de Biblioteca", "nivel": "Segundo Piso", "piso": 2}, {"id": 639, "nombre": "Módulo de Préstamo", "nivel": "Segundo Piso", "piso": 2}, {"id": 638, "nombre": "Sala de Estudios con Acervo de Física", "nivel": "Segundo Piso", "piso": 2}, {"id": 630, "nombre": "Secretaría de Comunicación y Difusión Cultural-Científica", "nivel": "Segundo Piso", "piso": 2}, {"id": 635, "nombre": "Servicio de Referencia Digital", "nivel": "Segundo Piso", "piso": 2}, {"id": 634, "nombre": "Taller de Cómputo Amoxcalli", "nivel": "Segundo Piso", "piso": 2}, {"id": 643, "nombre": "Estancia de Bibliotecarios III", "nivel": "Tercer Piso", "piso": 3}, {"id": 641, "nombre": "Megasala de Cómputo", "nivel": "Tercer Piso", "piso": 3}, {"id": 644, "nombre": "Sala de Estudios con Acervo de Biología", "nivel": "Tercer Piso", "piso": 3}, {"id": 642, "nombre": "Taller de Matemáticas", "nivel": "Tercer Piso", "piso": 3}]}, {"id": 3, "nombre": "Edificio A de Biología", "lugares": [{"id": 203, "nombre": "B009", "nivel": "Planta baja", "piso": 0}]}, {"id": 4, "nombre": "Edificio B de Biología", "lugares": [{"id": 296, "nombre": "Sala de Cómputo I", "nivel": "Planta baja", "piso": 0}, {"id": 297, "nombre": "Sala de Cómputo II", "nivel": "Planta baja", "piso": 0}, {"id": 298, "nombre": "Sala de Cómputo III", "nivel": "Planta baja", "piso": 0}, {"id": 195, "nombre": "B001", "nivel": "Primer Piso", "piso": 1}, {"id": 196, "nombre": "B002", "nivel": "Primer Piso", "piso": 1}, {"id": 197, "nombre": "B003", "nivel": "Primer Piso", "piso": 1}, {"id": 198, "nombre": "B004", "nivel": "Primer Piso", "piso": 1}, {"id": 199, "nombre": "B005", "nivel": "Primer Piso", "piso": 1}, {"id": 200, "nombre": "B006", "nivel": "Primer Piso", "piso": 1}, {"id": 201, "nombre": "B007", "nivel": "Primer Piso", "piso": 1}, {"id": 202, "nombre": "B008", "nivel": "Primer Piso", "piso": 1}]}, {"id": 2, "nombre": "Edificio Oriente", "lugares": [{"id": 490, "nombre": "Coordinación de Comisión de Equidad", "nivel": "Planta baja", "piso": 0}, {"id": 488, "nombre": "Coordinación del Consejo Técnico", "nivel": "Planta baja", "piso": 0}, {"id": 492, "nombre": "Correspondencia", "nivel": "Planta baja", "piso": 0}, {"id": 493, "nombre": "Delegación Sindical", "nivel": "Planta baja", "piso": 0}, {"id": 178, "nombre": "Dirección", "nivel": "Planta baja", "piso": 0}, {"id": 491, "nombre": "División Acádemica de Investigación y de Posgrado", "nivel": "Planta baja", "piso": 0}, {"id": 489, "nombre": "Oficina de Atención al Personal de Asignatura", "nivel": "Planta baja", "piso": 0}, {"id": 329, "nombre": "Sala del Consejo Técnico", "nivel": "Planta baja", "piso": 0}, {"id": 183, "nombre": "Secretaría de Vinculación", "nivel": "Planta baja", "piso": 0}, {"id": 179, "nombre": "Secretaría General", "nivel": "Planta baja", "piso": 0}, {"id": 32, "nombre": "O121", "nivel": "Primer Piso", "piso": 1}, {"id": 33, "nombre": "O122", "nivel": "Primer Piso", "piso": 1}, {"id": 34, "nombre": "O123", "nivel": "Primer Piso", "piso": 1}, {"id": 35, "nombre": "O124", "nivel": "Primer Piso", "piso": 1}, {"id": 36, "nombre": "O125", "nivel": "Primer Piso", "piso": 1}, {"id": 37, "nombre": "O126", "nivel": "Primer Piso", "piso": 1}, {"id": 38, "nombre": "O127", "nivel": "Primer Piso", "piso": 1}, {"id": 39, "nombre": "O128", "nivel": "Primer Piso", "piso": 1}, {"id": 40, "nombre": "O129", "nivel": "Primer Piso", "piso": 1}, {"id": 41, "nombre": "O130", "nivel": "Primer Piso", "piso": 1}, {"id": 42, "nombre": "O131", "nivel": "Primer Piso", "piso": 1}, {"id": 43, "nombre": "O132", "nivel": "Primer Piso", "piso": 1}, {"id": 44, "nombre": "O133", "nivel": "Primer Piso", "piso": 1}, {"id": 45, "nombre": "O134", "nivel": "Primer Piso", "piso": 1}, {"id": 46, "nombre": "O214", "nivel": "Segundo Piso", "piso": 2}, {"id": 47, "nombre": "O215", "nivel": "Segundo Piso", "piso": 2}, {"id": 48, "nombre": "O216", "nivel": "Segundo Piso", "piso": 2}, {"id": 49, "nombre": "O217", "nivel": "Segundo Piso", "piso": 2}, {"id": 50, "nombre": "O218", "nivel": "Segundo Piso", "piso": 2}, {"id": 51, "nombre": "O219", "nivel": "Segundo Piso", "piso": 2}, {"id": 52, "nombre": "O220", "nivel": "Segundo Piso", "piso": 2}, {"id": 53, "nombre": "O221", "nivel": "Segundo Piso", "piso": 2}, {"id": 54, "nombre": "O222", "nivel": "Segundo Piso", "piso": 2}, {"id": 55, "nombre": "O223", "nivel": "Segundo Piso", "piso": 2}]}, {"id": 1, "nombre": "Edificio Poniente", "lugares": [{"id": 194, "nombre": "Coordinación de Servicios Editoriales", "nivel": "Sótano", "piso": -1}, {"id": 645, "nombre": "Departamento de Bienes y Suministros", "nivel": "Planta Baja", "piso": 0}, {"id": 494, "nombre": "Departamento de Contabilidad y Presupuesto", "nivel": "Planta Baja", "piso": 0}, {"id": 496, "nombre": "Departamento de Personal Adminstrativo", "nivel": "Planta Baja", "piso": 0}, {"id": 495, "nombre": "Departamento de Servicios Admistrativos Prácticas de campo", "nivel": "Planta Baja", "piso": 0}, {"id": 186, "nombre": "División de Estudios Profesionales", "nivel": "Planta Baja", "piso": 0}, {"id": 187, "nombre": "Oficina de la DGAE", "nivel": "Planta Baja", "piso": 0}, {"id": 594, "nombre": "Pagaduría", "nivel": "Planta Baja", "piso": 0}, {"id": 455, "nombre": "Sala de Exámenes Profesionales", "nivel": "Planta Baja", "piso": 0}, {"id": 180, "nombre": "Secretaría Administrativa", "nivel": "Planta Baja", "piso": 0}, {"id": 497, "nombre": "Vigilancia 1", "nivel": "Planta Baja", "piso": 0}, {"id": 498, "nombre": "Vigilancia 2", "nivel": "Planta Baja", "piso": 0}, {"id": 323, "nombre": "Aula Magna P", "nivel": "Primer Piso", "piso": 1}, {"id": 1, "nombre": "P101", "nivel": "Primer Piso", "piso": 1}, {"id": 2, "nombre": "P102", "nivel": "Primer Piso", "piso": 1}, {"id": 3, "nombre": "P103", "nivel": "Primer Piso", "piso": 1}, {"id": 4, "nombre": "P104", "nivel": "Primer Piso", "piso": 1}, {"id": 5, "nombre": "P105", "nivel": "Primer Piso", "piso": 1}, {"id": 6, "nombre": "P106", "nivel": "Primer Piso", "piso": 1}, {"id": 7, "nombre": "P107", "nivel": "Primer Piso", "piso": 1}, {"id": 8, "nombre": "P108", "nivel": "Primer Piso", "piso": 1}, {"id": 9, "nombre": "P109", "nivel": "Primer Piso", "piso": 1}, {"id": 10, "nombre": "P110", "nivel": "Primer Piso", "piso": 1}, {"id": 11, "nombre": "P111", "nivel": "Primer Piso", "piso": 1}, {"id": 12, "nombre": "P112", "nivel": "Primer Piso", "piso": 1}, {"id": 13, "nombre": "P113", "nivel": "Primer Piso", "piso": 1}, {"id": 14, "nombre": "P114", "nivel": "Primer Piso", "piso": 1}, {"id": 15, "nombre": "P115", "nivel": "Primer Piso", "piso": 1}, {"id": 16, "nombre": "P116", "nivel": "Primer Piso", "piso": 1}, {"id": 17, "nombre": "P117", "nivel": "Primer Piso", "piso": 1}, {"id": 18, "nombre": "P118", "nivel": "Primer Piso", "piso": 1}, {"id": 484, "nombre": "Aula Magna Juan de Oyarzabal", "nivel": "Segundo Piso", "piso": 2}, {"id": 19, "nombre": "P201", "nivel": "Segundo Piso", "piso": 2}, {"id": 20, "nombre": "P202", "nivel": "Segundo Piso", "piso": 2}, {"id": 21, "nombre": "P203", "nivel": "Segundo Piso", "piso": 2}, {"id": 22, "nombre": "P204", "nivel": "Segundo Piso", "piso": 2}, {"id": 23, "nombre": "P205", "nivel": "Segundo Piso", "piso": 2}, {"id": 24, "nombre": "P206", "nivel": "Segundo Piso", "piso": 2}, {"id": 25, "nombre": "P207", "nivel": "Segundo Piso", "piso": 2}, {"id": 26, "nombre": "P208", "nivel": "Segundo Piso", "piso": 2}, {"id": 27, "nombre": "P209", "nivel": "Segundo Piso", "piso": 2}, {"id": 28, "nombre": "P210", "nivel": "Segundo Piso", "piso": 2}, {"id": 29, "nombre": "P211", "nivel": "Segundo Piso", "piso": 2}, {"id": 30, "nombre": "P212", "nivel": "Segundo Piso", "piso": 2}, {"id": 31, "nombre": "P213", "nivel": "Segundo Piso", "piso": 2}]}, {"id": 7, "nombre": "Edificio Tlahuizcalpan", "lugares": [{"id": 120, "nombre": "Aula Magna II", "nivel": "Sótano", "piso": -1}, {"id": 510, "nombre": "Coordinación de Laboratoristas de Biología", "nivel": "Sótano", "piso": -1}, {"id": 538, "nombre": "Cubículo Jefe de Intendencia", "nivel": "Sótano", "piso": -1}, {"id": 511, "nombre": "Intendencia", "nivel": "Sótano", "piso": -1}, {"id": 591, "nombre": "Laboratorio de apoyo de prácticas de campo", "nivel": "Sótano", "piso": -1}, {"id": 327, "nombre": "Laboratorio de Enseñanza de Cómputo de Actuaría", "nivel": "Sótano", "piso": -1}, {"id": 326, "nombre": "Laboratorio de Enseñanza de Cómputo de Matemáticas", "nivel": "Sótano", "piso": -1}, {"id": 307, "nombre": "Laboratorio de Enseñanza en Cómputo en Física", "nivel": "Sótano", "piso": -1}, {"id": 121, "nombre": "Laboratorio de Prácticas de Biología de Plantas I", "nivel": "Sótano", "piso": -1}, {"id": 122, "nombre": "Laboratorio de Prácticas de Biología de Plantas II", "nivel": "Sótano", "piso": -1}, {"id": 123, "nombre": "Laboratorio de Prácticas de Ciencias de la Tierra", "nivel": "Sótano", "piso": -1}, {"id": 124, "nombre": "Laboratorio de Prácticas de Ecología y Recursos Naturales", "nivel": "Sótano", "piso": -1}, {"id": 125, "nombre": "Métodos Básicos de Biología I (antes Laboratorio de Prácticas de Química I)", "nivel": "Sótano", "piso": -1}, {"id": 127, "nombre": "Métodos Básicos de Biología II (antes Laboratorio de Prácticas de Química Orgánica)", "nivel": "Sótano", "piso": -1}, {"id": 126, "nombre": "Química II (antes Laboratorio de Prácticas de Química II)", "nivel": "Sótano", "piso": -1}, {"id": 129, "nombre": "S2", "nivel": "Sótano", "piso": -1}, {"id": 130, "nombre": "S3", "nivel": "Sótano", "piso": -1}, {"id": 131, "nombre": "S4", "nivel": "Sótano", "piso": -1}, {"id": 132, "nombre": "S5", "nivel": "Sótano", "piso": -1}, {"id": 133, "nombre": "S6", "nivel": "Sótano", "piso": -1}, {"id": 320, "nombre": "Taller de Biofísica", "nivel": "Sótano", "piso": -1}, {"id": 134, "nombre": "Taller de Biología de Plantas I y II", "nivel": "Sótano", "piso": -1}, {"id": 135, "nombre": "Taller de Ciencias de la Tierra", "nivel": "Sótano", "piso": -1}, {"id": 310, "nombre": "Taller de Ciencias de Materiales", "nivel": "Sótano", "piso": -1}, {"id": 312, "nombre": "Taller de Colisiones", "nivel": "Sótano", "piso": -1}, {"id": 136, "nombre": "Taller de Ecología y Recursos Naturales", "nivel": "Sótano", "piso": -1}, {"id": 322, "nombre": "Taller de Estado Sólido Computacional", "nivel": "Sótano", "piso": -1}, {"id": 315, "nombre": "Taller de Fluidos", "nivel": "Sótano", "piso": -1}, {"id": 314, "nombre": "Taller de Física de Radiaciones", "nivel": "Sótano", "piso": -1}, {"id": 476, "nombre": "Taller de Hidrodinámica y Turbulencia", "nivel": "Sótano", "piso": -1}, {"id": 477, "nombre": "Taller de Luminiscencia", "nivel": "Sótano", "piso": -1}, {"id": 597, "nombre": "Taller de Luminiscencia y Resonancia Magnética", "nivel": "Sótano", "piso": -1}, {"id": 294, "nombre": "Taller de Microscopía Electrónica", "nivel": "Sótano", "piso": -1}, {"id": 486, "nombre": "Taller de Química", "nivel": "Sótano", "piso": -1}, {"id": 295, "nombre": "Taller de Recursos Naturales", "nivel": "Sótano", "piso": -1}, {"id": 317, "nombre": "Taller de Óptica Avanzada", "nivel": "Sótano", "piso": -1}, {"id": 478, "nombre": "Taller de Óptica Láser", "nivel": "Sótano", "piso": -1}, {"id": 128, "nombre": "Taller Interdisciplinario de Física y Biomedicina I", "nivel": "Sótano", "piso": -1}, {"id": 139, "nombre": "002", "nivel": "Planta Baja", "piso": 0}, {"id": 293, "nombre": "003", "nivel": "Planta Baja", "piso": 0}, {"id": 140, "nombre": "004", "nivel": "Planta Baja", "piso": 0}, {"id": 141, "nombre": "005", "nivel": "Planta Baja", "piso": 0}, {"id": 142, "nombre": "006", "nivel": "Planta Baja", "piso": 0}, {"id": 143, "nombre": "008", "nivel": "Planta Baja", "piso": 0}, {"id": 144, "nombre": "009", "nivel": "Planta Baja", "piso": 0}, {"id": 145, "nombre": "010", "nivel": "Planta Baja", "piso": 0}, {"id": 146, "nombre": "011", "nivel": "Planta Baja", "piso": 0}, {"id": 502, "nombre": "Aula 1a DAIP", "nivel": "Planta Baja", "piso": 0}, {"id": 501, "nombre": "Aula 1b DAIP", "nivel": "Planta Baja", "piso": 0}, {"id": 453, "nombre": "Aula Multifuncional de Ciencias de la Tierra I", "nivel": "Planta Baja", "piso": 0}, {"id": 454, "nombre": "Aula Multifuncional de Ciencias de la Tierra II", "nivel": "Planta Baja", "piso": 0}, {"id": 503, "nombre": "Coordinación de Tlahuizcalpan", "nivel": "Planta Baja", "piso": 0}, {"id": 602, "nombre": "Cubículo Secretaría de Educacíon Abierta y Continua", "nivel": "Planta Baja", "piso": 0}, {"id": 505, "nombre": "Espora", "nivel": "Planta Baja", "piso": 0}, {"id": 330, "nombre": "Laboratorio de Idiomas", "nivel": "Planta Baja", "piso": 0}, {"id": 152, "nombre": "Laboratorio de Prácticas de Biología de Animales I", "nivel": "Planta Baja", "piso": 0}, {"id": 153, "nombre": "Laboratorio de Prácticas de Biología de Animales II", "nivel": "Planta Baja", "piso": 0}, {"id": 154, "nombre": "Laboratorio de Prácticas de Biología de Animales III", "nivel": "Planta Baja", "piso": 0}, {"id": 157, "nombre": "Laboratorio de Prácticas de Biología Molecular de la Célula I", "nivel": "Planta Baja", "piso": 0}, {"id": 158, "nombre": "Laboratorio de Prácticas de Biología Molecular de la Célula II", "nivel": "Planta Baja", "piso": 0}, {"id": 159, "nombre": "Laboratorio de Prácticas de Biología Molecular de la Célula III", "nivel": "Planta Baja", "piso": 0}, {"id": 161, "nombre": "Laboratorio de Prácticas de Biotecnología", "nivel": "Planta Baja", "piso": 0}, {"id": 160, "nombre": "Laboratorio de Prácticas de Genética", "nivel": "Planta Baja", "piso": 0}, {"id": 537, "nombre": "Sala de Maestros, Cubículos Contabilidad, Cubículo Bienes y Suministros", "nivel": "Planta Baja", "piso": 0}, {"id": 479, "nombre": "Secretaría de Asuntos Estudiantiles", "nivel": "Planta Baja", "piso": 0}, {"id": 506, "nombre": "Servicios Generales", "nivel": "Planta Baja", "piso": 0}, {"id": 485, "nombre": "SUHFECIM", "nivel": "Planta Baja", "piso": 0}, {"id": 164, "nombre": "Taller de Análisis Ambiental", "nivel": "Planta Baja", "piso": 0}, {"id": 244, "nombre": "Taller de Análisis Numérico", "nivel": "Planta Baja", "piso": 0}, {"id": 319, "nombre": "Taller de análisis radiológico de muestras ambientales", "nivel": "Planta Baja", "piso": 0}, {"id": 595, "nombre": "Taller de Bioacústica", "nivel": "Planta Baja", "piso": 0}, {"id": 166, "nombre": "Taller de Biología de Animales I", "nivel": "Planta Baja", "piso": 0}, {"id": 167, "nombre": "Taller de Biología de Animales II", "nivel": "Planta Baja", "piso": 0}, {"id": 168, "nombre": "Taller de Biología de Animales III", "nivel": "Planta Baja", "piso": 0}, {"id": 172, "nombre": "Taller de Biología Molecular de la Célula I y II", "nivel": "Planta Baja", "piso": 0}, {"id": 171, "nombre": "Taller de Biología Molecular de la Célula III", "nivel": "Planta Baja", "piso": 0}, {"id": 504, "nombre": "Taller de Ciencia de Materiales", "nivel": "Planta Baja", "piso": 0}, {"id": 507, "nombre": "Taller de Genética", "nivel": "Planta Baja", "piso": 0}, {"id": 318, "nombre": "Taller de Termodinámica", "nivel": "Planta Baja", "piso": 0}, {"id": 499, "nombre": "Taller de Topología", "nivel": "Planta Baja", "piso": 0}, {"id": 311, "nombre": "Taller de Vacío", "nivel": "Planta Baja", "piso": 0}, {"id": 147, "nombre": "101", "nivel": "Primer Piso", "piso": 1}, {"id": 148, "nombre": "102", "nivel": "Primer Piso", "piso": 1}, {"id": 149, "nombre": "103", "nivel": "Primer Piso", "piso": 1}, {"id": 150, "nombre": "Aula Magna I", "nivel": "Primer Piso", "piso": 1}, {"id": 604, "nombre": "Cámara Semianecoica", "nivel": "Primer Piso", "piso": 1}, {"id": 151, "nombre": "Laboratorio de Prácticas de Biogeografía I", "nivel": "Primer Piso", "piso": 1}, {"id": 155, "nombre": "Laboratorio de Prácticas de Biología de Procariontes", "nivel": "Primer Piso", "piso": 1}, {"id": 162, "nombre": "Laboratorio de Prácticas de Paleobiología", "nivel": "Primer Piso", "piso": 1}, {"id": 156, "nombre": "Laboratorio de Prácticas de Protistas y Algas", "nivel": "Primer Piso", "piso": 1}, {"id": 163, "nombre": "Laboratorio de Prácticas de Sistemática I", "nivel": "Primer Piso", "piso": 1}, {"id": 185, "nombre": "Secretaría de Educación Abierta y Continua", "nivel": "Primer Piso", "piso": 1}, {"id": 165, "nombre": "Taller de Biogeografía y Sistemática", "nivel": "Primer Piso", "piso": 1}, {"id": 169, "nombre": "Taller de Biología de Procariontes", "nivel": "Primer Piso", "piso": 1}, {"id": 170, "nombre": "Taller de Biología de Protistas y Algas", "nivel": "Primer Piso", "piso": 1}, {"id": 313, "nombre": "Taller de Control y Electrónica", "nivel": "Primer Piso", "piso": 1}, {"id": 596, "nombre": "Taller de Cómputo General - Técnicos Académicos Matemáticas", "nivel": "Primer Piso", "piso": 1}, {"id": 512, "nombre": "Taller de Cómputo Tlahuizcalpan", "nivel": "Primer Piso", "piso": 1}, {"id": 247, "nombre": "Taller de Demografía", "nivel": "Primer Piso", "piso": 1}, {"id": 475, "nombre": "Taller de Electricidad", "nivel": "Primer Piso", "piso": 1}, {"id": 248, "nombre": "Taller de Estadística", "nivel": "Primer Piso", "piso": 1}, {"id": 245, "nombre": "Taller de Finanzas", "nivel": "Primer Piso", "piso": 1}, {"id": 251, "nombre": "Taller de Geometría", "nivel": "Primer Piso", "piso": 1}, {"id": 249, "nombre": "Taller de Investigación de Operaciones ", "nivel": "Primer Piso", "piso": 1}, {"id": 174, "nombre": "Taller de Paleobiología", "nivel": "Primer Piso", "piso": 1}, {"id": 252, "nombre": "Taller de Sistemas Complejos", "nivel": "Primer Piso", "piso": 1}, {"id": 250, "nombre": "Taller de Álgebra", "nivel": "Primer Piso", "piso": 1}, {"id": 175, "nombre": "201", "nivel": "Segundo Piso", "piso": 2}, {"id": 253, "nombre": "Laboratorio de Ciencias de la Computación 1", "nivel": "Segundo Piso", "piso": 2}, {"id": 254, "nombre": "Laboratorio de Ciencias de la Computación 2", "nivel": "Segundo Piso", "piso": 2}, {"id": 255, "nombre": "Laboratorio de Ciencias de la Computación 3", "nivel": "Segundo Piso", "piso": 2}, {"id": 508, "nombre": "Laboratorio de Dinámica Biofísica y Fisiología de Sistemas", "nivel": "Segundo Piso", "piso": 2}, {"id": 176, "nombre": "Laboratorio de Prácticas de Biología de Hongos", "nivel": "Segundo Piso", "piso": 2}, {"id": 177, "nombre": "Taller de Biología de Hongos", "nivel": "Segundo Piso", "piso": 2}, {"id": 429, "nombre": "Taller de Computación Visual e Innovación Tecnológica ", "nivel": "Segundo Piso", "piso": 2}, {"id": 509, "nombre": "Taller de Física", "nivel": "Segundo Piso", "piso": 2}, {"id": 257, "nombre": "Taller de Ingeniería de Software", "nivel": "Segundo Piso", "piso": 2}, {"id": 256, "nombre": "Taller de Lenguajes de Programación", "nivel": "Segundo Piso", "piso": 2}, {"id": 316, "nombre": "Taller de Meteorología", "nivel": "Segundo Piso", "piso": 2}, {"id": 258, "nombre": "Taller de Sistemas Operativos, Redes de Cómputo, Sistemas Distribuidos y Manejo de Información", "nivel": "Segundo Piso", "piso": 2}, {"id": 259, "nombre": "Taller de Sistemas Simbólicos", "nivel": "Segundo Piso", "piso": 2}, {"id": 516, "nombre": "Técnicos Académicos - Biología 1", "nivel": "Segundo Piso", "piso": 2}, {"id": 519, "nombre": "Técnicos Académicos - Biología 2", "nivel": "Segundo Piso", "piso": 2}, {"id": 518, "nombre": "Técnicos Académicos - Ciencias de la Computación", "nivel": "Segundo Piso", "piso": 2}, {"id": 517, "nombre": "Técnicos Académicos - Coordinación de Cómputo - Proyectos", "nivel": "Segundo Piso", "piso": 2}, {"id": 603, "nombre": "Técnicos Académicos - Coordinación de Cómputo - XFC", "nivel": "Segundo Piso", "piso": 2}]}, {"id": 5, "nombre": "Edificio de Física", "lugares": [{"id": 88, "nombre": "Laboratorio de Física General I", "nivel": "Planta baja", "piso": 0}, {"id": 89, "nombre": "Laboratorio de Física General II", "nivel": "Planta baja", "piso": 0}, {"id": 90, "nombre": "Laboratorio de Física General III", "nivel": "Planta baja", "piso": 0}, {"id": 92, "nombre": "Laboratorio de Física General V", "nivel": "Planta baja", "piso": 0}, {"id": 93, "nombre": "Laboratorio de Física General VI", "nivel": "Planta baja", "piso": 0}, {"id": 94, "nombre": "Laboratorio de Mecánica I", "nivel": "Planta baja", "piso": 0}, {"id": 95, "nombre": "Laboratorio de Mecánica II", "nivel": "Planta baja", "piso": 0}, {"id": 96, "nombre": "Laboratorio de Mecánica III", "nivel": "Planta baja", "piso": 0}, {"id": 91, "nombre": "Taller Interdisciplinario de Física y Biomedicina III", "nivel": "Planta baja", "piso": 0}, {"id": 487, "nombre": "Consejo Departamental de Física", "nivel": "Primer Piso", "piso": 1}, {"id": 97, "nombre": "Laboratorio de Calor, Ondas y Fluidos I", "nivel": "Primer Piso", "piso": 1}, {"id": 98, "nombre": "Laboratorio de Calor, Ondas y Fluidos II", "nivel": "Primer Piso", "piso": 1}, {"id": 300, "nombre": "Laboratorio de Electromagnetismo I", "nivel": "Primer Piso", "piso": 1}, {"id": 301, "nombre": "Laboratorio de Electromagnetismo II", "nivel": "Primer Piso", "piso": 1}, {"id": 101, "nombre": "Laboratorio de Electrónica I", "nivel": "Primer Piso", "piso": 1}, {"id": 102, "nombre": "Laboratorio de Electrónica II", "nivel": "Primer Piso", "piso": 1}, {"id": 299, "nombre": "Laboratorio de Óptica I", "nivel": "Primer Piso", "piso": 1}, {"id": 103, "nombre": "Laboratorio de Óptica II", "nivel": "Primer Piso", "piso": 1}, {"id": 308, "nombre": "Aula 1 de Computación en Física", "nivel": "Segundo Piso", "piso": 2}, {"id": 309, "nombre": "Aula 2 de Computación en Física", "nivel": "Segundo Piso", "piso": 2}, {"id": 304, "nombre": "Aula 3 de Computación en Física", "nivel": "Segundo Piso", "piso": 2}, {"id": 108, "nombre": "Laboratorio de Física Moderna I", "nivel": "Segundo Piso", "piso": 2}, {"id": 109, "nombre": "Laboratorio de Física Moderna II", "nivel": "Segundo Piso", "piso": 2}, {"id": 528, "nombre": "Laboratorio de Mecanobiología del Músculo", "nivel": "Segundo Piso", "piso": 2}, {"id": 302, "nombre": "Laboratorio Libre I", "nivel": "Segundo Piso", "piso": 2}, {"id": 106, "nombre": "Sala de Proyecciones ", "nivel": "Segundo Piso", "piso": 2}, {"id": 532, "nombre": "Secretaría Técnica de la Licenciatura en Ciencias de la Tierra", "nivel": "Segundo Piso", "piso": 2}, {"id": 533, "nombre": "Secretaría Técnica de la Licenciatura en Física", "nivel": "Segundo Piso", "piso": 2}, {"id": 534, "nombre": "Secretaría Técnica de la Licenciatura en Física Biomédica", "nivel": "Segundo Piso", "piso": 2}, {"id": 529, "nombre": "Sociedad Mexicana de Física", "nivel": "Segundo Piso", "piso": 2}, {"id": 566, "nombre": "Cubículo 302", "nivel": "Tercer Piso", "piso": 3}, {"id": 567, "nombre": "Cubículo 303", "nivel": "Tercer Piso", "piso": 3}, {"id": 568, "nombre": "Cubículo 304", "nivel": "Tercer Piso", "piso": 3}, {"id": 569, "nombre": "Cubículo 305", "nivel": "Tercer Piso", "piso": 3}, {"id": 570, "nombre": "Cubículo 305A", "nivel": "Tercer Piso", "piso": 3}, {"id": 571, "nombre": "Cubículo 306", "nivel": "Tercer Piso", "piso": 3}, {"id": 572, "nombre": "Cubículo 307", "nivel": "Tercer Piso", "piso": 3}, {"id": 573, "nombre": "Cubículo 308", "nivel": "Tercer Piso", "piso": 3}, {"id": 574, "nombre": "Cubículo 309", "nivel": "Tercer Piso", "piso": 3}, {"id": 575, "nombre": "Cubículo 310", "nivel": "Tercer Piso", "piso": 3}, {"id": 576, "nombre": "Cubículo 311", "nivel": "Tercer Piso", "piso": 3}, {"id": 577, "nombre": "Cubículo 312", "nivel": "Tercer Piso", "piso": 3}, {"id": 578, "nombre": "Cubículo 313", "nivel": "Tercer Piso", "piso": 3}, {"id": 579, "nombre": "Cubículo 314", "nivel": "Tercer Piso", "piso": 3}, {"id": 580, "nombre": "Cubículo 315", "nivel": "Tercer Piso", "piso": 3}, {"id": 581, "nombre": "Cubículo 316", "nivel": "Tercer Piso", "piso": 3}, {"id": 582, "nombre": "Cubículo 317", "nivel": "Tercer Piso", "piso": 3}, {"id": 583, "nombre": "Cubículo 318", "nivel": "Tercer Piso", "piso": 3}, {"id": 584, "nombre": "Cubículo 319", "nivel": "Tercer Piso", "piso": 3}, {"id": 585, "nombre": "Cubículo 320", "nivel": "Tercer Piso", "piso": 3}, {"id": 586, "nombre": "Cubículo 321", "nivel": "Tercer Piso", "piso": 3}, {"id": 587, "nombre": "Cubículo 322", "nivel": "Tercer Piso", "piso": 3}, {"id": 588, "nombre": "Cubículo 323", "nivel": "Tercer Piso", "piso": 3}, {"id": 536, "nombre": "Cubículo Profesores 328", "nivel": "Tercer Piso", "piso": 3}, {"id": 590, "nombre": "Física Atómica y Molecular", "nivel": "Tercer Piso", "piso": 3}, {"id": 522, "nombre": "Laboratorio de Acústica", "nivel": "Tercer Piso", "piso": 3}, {"id": 521, "nombre": "Laboratorio Interdisciplinario", "nivel": "Tercer Piso", "piso": 3}, {"id": 515, "nombre": "Sala de Profesores 329", "nivel": "Tercer Piso", "piso": 3}, {"id": 305, "nombre": "Salón de Seminarios 327", "nivel": "Tercer Piso", "piso": 3}, {"id": 306, "nombre": "Salón de Seminarios 330", "nivel": "Tercer Piso", "piso": 3}, {"id": 457, "nombre": "Sistemas Computacionales y Físicos", "nivel": "Tercer Piso", "piso": 3}, {"id": 539, "nombre": "Cubículo 401", "nivel": "Cuarto Piso", "piso": 4}, {"id": 540, "nombre": "Cubículo 402", "nivel": "Cuarto Piso", "piso": 4}, {"id": 541, "nombre": "Cubículo 403", "nivel": "Cuarto Piso", "piso": 4}, {"id": 542, "nombre": "Cubículo 404", "nivel": "Cuarto Piso", "piso": 4}, {"id": 543, "nombre": "Cubículo 405", "nivel": "Cuarto Piso", "piso": 4}, {"id": 544, "nombre": "Cubículo 406", "nivel": "Cuarto Piso", "piso": 4}, {"id": 545, "nombre": "Cubículo 407", "nivel": "Cuarto Piso", "piso": 4}, {"id": 546, "nombre": "Cubículo 408", "nivel": "Cuarto Piso", "piso": 4}, {"id": 547, "nombre": "Cubículo 409-A", "nivel": "Cuarto Piso", "piso": 4}, {"id": 535, "nombre": "Cubículo 409-B", "nivel": "Cuarto Piso", "piso": 4}, {"id": 548, "nombre": "Cubículo 410", "nivel": "Cuarto Piso", "piso": 4}, {"id": 549, "nombre": "Cubículo 411", "nivel": "Cuarto Piso", "piso": 4}, {"id": 550, "nombre": "Cubículo 412", "nivel": "Cuarto Piso", "piso": 4}, {"id": 551, "nombre": "Cubículo 413", "nivel": "Cuarto Piso", "piso": 4}, {"id": 552, "nombre": "Cubículo 414", "nivel": "Cuarto Piso", "piso": 4}, {"id": 553, "nombre": "Cubículo 415", "nivel": "Cuarto Piso", "piso": 4}, {"id": 554, "nombre": "Cubículo 416", "nivel": "Cuarto Piso", "piso": 4}, {"id": 555, "nombre": "Cubículo 417", "nivel": "Cuarto Piso", "piso": 4}, {"id": 556, "nombre": "Cubículo 418", "nivel": "Cuarto Piso", "piso": 4}, {"id": 557, "nombre": "Cubículo 419", "nivel": "Cuarto Piso", "piso": 4}, {"id": 558, "nombre": "Cubículo 420", "nivel": "Cuarto Piso", "piso": 4}, {"id": 559, "nombre": "Cubículo 421", "nivel": "Cuarto Piso", "piso": 4}, {"id": 560, "nombre": "Cubículo 422", "nivel": "Cuarto Piso", "piso": 4}, {"id": 561, "nombre": "Cubículo 423", "nivel": "Cuarto Piso", "piso": 4}, {"id": 562, "nombre": "Cubículo 424", "nivel": "Cuarto Piso", "piso": 4}, {"id": 563, "nombre": "Cubículo 425", "nivel": "Cuarto Piso", "piso": 4}, {"id": 564, "nombre": "Cubículo 426", "nivel": "Cuarto Piso", "piso": 4}, {"id": 565, "nombre": "Cubículo 427", "nivel": "Cuarto Piso", "piso": 4}, {"id": 589, "nombre": "Cubículos 1-11", "nivel": "Cuarto Piso", "piso": 4}, {"id": 592, "nombre": "Laboratorio de Biofísica 431", "nivel": "Cuarto Piso", "piso": 4}, {"id": 593, "nombre": "Laboratorio de Biofísica de Sistemas Excitables 430", "nivel": "Cuarto Piso", "piso": 4}, {"id": 531, "nombre": "Laboratorio de Cómputo 435", "nivel": "Cuarto Piso", "piso": 4}, {"id": 520, "nombre": "Laboratorio de Fluidos 428", "nivel": "Cuarto Piso", "piso": 4}, {"id": 530, "nombre": "Sala de Cómputo del personal Académico 434", "nivel": "Cuarto Piso", "piso": 4}, {"id": 114, "nombre": "Salón de Seminarios 429", "nivel": "Cuarto Piso", "piso": 4}, {"id": 115, "nombre": "Salón de Seminarios 436", "nivel": "Cuarto Piso", "piso": 4}]}, {"id": 6, "nombre": "Edificio de Matemáticas", "lugares": [{"id": 332, "nombre": "Cubículo 002", "nivel": "Planta baja", "piso": 0}, {"id": 331, "nombre": "Cubículo 003", "nivel": "Planta baja", "piso": 0}, {"id": 333, "nombre": "Cubículo 004", "nivel": "Planta baja", "piso": 0}, {"id": 334, "nombre": "Cubículo 005", "nivel": "Planta baja", "piso": 0}, {"id": 335, "nombre": "Cubículo 006", "nivel": "Planta baja", "piso": 0}, {"id": 336, "nombre": "Cubículo 007", "nivel": "Planta baja", "piso": 0}, {"id": 337, "nombre": "Cubículo 008", "nivel": "Planta baja", "piso": 0}, {"id": 338, "nombre": "Cubículo 010", "nivel": "Planta baja", "piso": 0}, {"id": 339, "nombre": "Cubículo 011", "nivel": "Planta baja", "piso": 0}, {"id": 340, "nombre": "Cubículo 012", "nivel": "Planta baja", "piso": 0}, {"id": 341, "nombre": "Cubículo 013", "nivel": "Planta baja", "piso": 0}, {"id": 342, "nombre": "Cubículo 014", "nivel": "Planta baja", "piso": 0}, {"id": 343, "nombre": "Cubículo 015", "nivel": "Planta baja", "piso": 0}, {"id": 344, "nombre": "Cubículo 016", "nivel": "Planta baja", "piso": 0}, {"id": 345, "nombre": "Cubículo 017", "nivel": "Planta baja", "piso": 0}, {"id": 346, "nombre": "Cubículo 018", "nivel": "Planta baja", "piso": 0}, {"id": 347, "nombre": "Cubículo 019", "nivel": "Planta baja", "piso": 0}, {"id": 348, "nombre": "Cubículo 020", "nivel": "Planta baja", "piso": 0}, {"id": 349, "nombre": "Cubículo 021", "nivel": "Planta baja", "piso": 0}, {"id": 350, "nombre": "Cubículo 022", "nivel": "Planta baja", "piso": 0}, {"id": 351, "nombre": "Cubículo 023", "nivel": "Planta baja", "piso": 0}, {"id": 352, "nombre": "Cubículo 024", "nivel": "Planta baja", "piso": 0}, {"id": 353, "nombre": "Cubículo 025", "nivel": "Planta baja", "piso": 0}, {"id": 354, "nombre": "Cubículo 026", "nivel": "Planta baja", "piso": 0}, {"id": 355, "nombre": "Cubículo 027", "nivel": "Planta baja", "piso": 0}, {"id": 356, "nombre": "Cubículo 028", "nivel": "Planta baja", "piso": 0}, {"id": 357, "nombre": "Cubículo 029", "nivel": "Planta baja", "piso": 0}, {"id": 358, "nombre": "Cubículo 030", "nivel": "Planta baja", "piso": 0}, {"id": 359, "nombre": "Cubículo 033", "nivel": "Planta baja", "piso": 0}, {"id": 360, "nombre": "Cubículo 034", "nivel": "Planta baja", "piso": 0}, {"id": 361, "nombre": "Cubículo 100", "nivel": "Primer Piso", "piso": 1}, {"id": 362, "nombre": "Cubículo 101", "nivel": "Primer Piso", "piso": 1}, {"id": 363, "nombre": "Cubículo 102", "nivel": "Primer Piso", "piso": 1}, {"id": 364, "nombre": "Cubículo 103", "nivel": "Primer Piso", "piso": 1}, {"id": 365, "nombre": "Cubículo 104", "nivel": "Primer Piso", "piso": 1}, {"id": 366, "nombre": "Cubículo 105", "nivel": "Primer Piso", "piso": 1}, {"id": 367, "nombre": "Cubículo 106", "nivel": "Primer Piso", "piso": 1}, {"id": 368, "nombre": "Cubículo 107", "nivel": "Primer Piso", "piso": 1}, {"id": 369, "nombre": "Cubículo 108", "nivel": "Primer Piso", "piso": 1}, {"id": 370, "nombre": "Cubículo 109", "nivel": "Primer Piso", "piso": 1}, {"id": 371, "nombre": "Cubículo 110", "nivel": "Primer Piso", "piso": 1}, {"id": 372, "nombre": "Cubículo 111", "nivel": "Primer Piso", "piso": 1}, {"id": 373, "nombre": "Cubículo 112", "nivel": "Primer Piso", "piso": 1}, {"id": 374, "nombre": "Cubículo 113", "nivel": "Primer Piso", "piso": 1}, {"id": 375, "nombre": "Cubículo 114", "nivel": "Primer Piso", "piso": 1}, {"id": 376, "nombre": "Cubículo 115", "nivel": "Primer Piso", "piso": 1}, {"id": 377, "nombre": "Cubículo 116", "nivel": "Primer Piso", "piso": 1}, {"id": 378, "nombre": "Cubículo 117", "nivel": "Primer Piso", "piso": 1}, {"id": 379, "nombre": "Cubículo 118", "nivel": "Primer Piso", "piso": 1}, {"id": 380, "nombre": "Cubículo 119", "nivel": "Primer Piso", "piso": 1}, {"id": 381, "nombre": "Cubículo 120", "nivel": "Primer Piso", "piso": 1}, {"id": 382, "nombre": "Cubículo 121", "nivel": "Primer Piso", "piso": 1}, {"id": 383, "nombre": "Cubículo 122", "nivel": "Primer Piso", "piso": 1}, {"id": 384, "nombre": "Cubículo 123", "nivel": "Primer Piso", "piso": 1}, {"id": 385, "nombre": "Cubículo 124", "nivel": "Primer Piso", "piso": 1}, {"id": 386, "nombre": "Cubículo 125", "nivel": "Primer Piso", "piso": 1}, {"id": 387, "nombre": "Cubículo 126", "nivel": "Primer Piso", "piso": 1}, {"id": 388, "nombre": "Cubículo 127", "nivel": "Primer Piso", "piso": 1}, {"id": 389, "nombre": "Cubículo 130", "nivel": "Primer Piso", "piso": 1}, {"id": 390, "nombre": "Cubículo 131", "nivel": "Primer Piso", "piso": 1}, {"id": 391, "nombre": "Cubículo 132", "nivel": "Primer Piso", "piso": 1}, {"id": 116, "nombre": "Salón de Seminarios S-102", "nivel": "Primer Piso", "piso": 1}, {"id": 117, "nombre": "Salón de Seminarios S-104", "nivel": "Primer Piso", "piso": 1}, {"id": 118, "nombre": "Salón de Seminarios S-105", "nivel": "Primer Piso", "piso": 1}, {"id": 392, "nombre": "Cubículo 202", "nivel": "Segundo Piso", "piso": 2}, {"id": 393, "nombre": "Cubículo 203", "nivel": "Segundo Piso", "piso": 2}, {"id": 394, "nombre": "Cubículo 204", "nivel": "Segundo Piso", "piso": 2}, {"id": 395, "nombre": "Cubículo 205", "nivel": "Segundo Piso", "piso": 2}, {"id": 396, "nombre": "Cubículo 208", "nivel": "Segundo Piso", "piso": 2}, {"id": 397, "nombre": "Cubículo 209", "nivel": "Segundo Piso", "piso": 2}, {"id": 398, "nombre": "Cubículo 210", "nivel": "Segundo Piso", "piso": 2}, {"id": 399, "nombre": "Cubículo 211", "nivel": "Segundo Piso", "piso": 2}, {"id": 400, "nombre": "Cubículo 212", "nivel": "Segundo Piso", "piso": 2}, {"id": 401, "nombre": "Cubículo 213", "nivel": "Segundo Piso", "piso": 2}, {"id": 402, "nombre": "Cubículo 214", "nivel": "Segundo Piso", "piso": 2}, {"id": 403, "nombre": "Cubículo 215", "nivel": "Segundo Piso", "piso": 2}, {"id": 404, "nombre": "Cubículo 217", "nivel": "Segundo Piso", "piso": 2}, {"id": 405, "nombre": "Cubículo 219", "nivel": "Segundo Piso", "piso": 2}, {"id": 406, "nombre": "Cubículo 220", "nivel": "Segundo Piso", "piso": 2}, {"id": 407, "nombre": "Cubículo 221", "nivel": "Segundo Piso", "piso": 2}, {"id": 408, "nombre": "Cubículo 223", "nivel": "Segundo Piso", "piso": 2}, {"id": 409, "nombre": "Cubículo 224", "nivel": "Segundo Piso", "piso": 2}, {"id": 410, "nombre": "Cubículo 225", "nivel": "Segundo Piso", "piso": 2}, {"id": 411, "nombre": "Cubículo 226", "nivel": "Segundo Piso", "piso": 2}, {"id": 412, "nombre": "Cubículo 227", "nivel": "Segundo Piso", "piso": 2}, {"id": 413, "nombre": "Cubículo 228", "nivel": "Segundo Piso", "piso": 2}, {"id": 414, "nombre": "Cubículo 229", "nivel": "Segundo Piso", "piso": 2}, {"id": 415, "nombre": "Cubículo 230", "nivel": "Segundo Piso", "piso": 2}, {"id": 416, "nombre": "Cubículo 231", "nivel": "Segundo Piso", "piso": 2}, {"id": 417, "nombre": "Cubículo 232", "nivel": "Segundo Piso", "piso": 2}, {"id": 418, "nombre": "Cubículo 233", "nivel": "Segundo Piso", "piso": 2}, {"id": 419, "nombre": "Cubículo 234", "nivel": "Segundo Piso", "piso": 2}, {"id": 420, "nombre": "Cubículo 235", "nivel": "Segundo Piso", "piso": 2}, {"id": 421, "nombre": "Cubículo 236", "nivel": "Segundo Piso", "piso": 2}, {"id": 422, "nombre": "Cubículo 237", "nivel": "Segundo Piso", "piso": 2}, {"id": 423, "nombre": "Cubículo 238", "nivel": "Segundo Piso", "piso": 2}, {"id": 424, "nombre": "Cubículo 239", "nivel": "Segundo Piso", "piso": 2}, {"id": 425, "nombre": "Cubículo 241", "nivel": "Segundo Piso", "piso": 2}, {"id": 426, "nombre": "Cubículo 242", "nivel": "Segundo Piso", "piso": 2}, {"id": 427, "nombre": "Cubículo 243", "nivel": "Segundo Piso", "piso": 2}, {"id": 428, "nombre": "Cubículo 244", "nivel": "Segundo Piso", "piso": 2}]}, {"id": 12, "nombre": "Edificio de Talleres", "lugares": [{"id": 525, "nombre": "Archivo", "nivel": "Planta Baja", "piso": 0}, {"id": 523, "nombre": "Coordinación de Mantenimiento", "nivel": "Planta Baja", "piso": 0}, {"id": 514, "nombre": "Cubículo 01 - Actividades Deportivas", "nivel": "Planta Baja", "piso": 0}, {"id": 513, "nombre": "Cubículo 02 - Protección Civil", "nivel": "Planta Baja", "piso": 0}, {"id": 600, "nombre": "Jurídico", "nivel": "Planta Baja", "piso": 0}, {"id": 524, "nombre": "Sala de Juntas Jurídico", "nivel": "Planta Baja", "piso": 0}, {"id": 527, "nombre": "Taller de Carpintería", "nivel": "Planta Baja", "piso": 0}, {"id": 599, "nombre": "Taller de Electrónica", "nivel": "Planta Baja", "piso": 0}, {"id": 601, "nombre": "Taller de Innovación", "nivel": "Planta Baja", "piso": 0}, {"id": 598, "nombre": "Taller de Mantenimiento", "nivel": "Planta Baja", "piso": 0}, {"id": 526, "nombre": "Taller Mecánico", "nivel": "Planta Baja", "piso": 0}, {"id": 605, "nombre": "Aula T1", "nivel": "Primer Piso", "piso": 1}, {"id": 606, "nombre": "Aula T2", "nivel": "Primer Piso", "piso": 1}, {"id": 607, "nombre": "Aula T3", "nivel": "Primer Piso", "piso": 1}, {"id": 608, "nombre": "Salón Área Colaborativa", "nivel": "Primer Piso", "piso": 1}]}, {"id": 9, "nombre": "Ex Biblioteca", "lugares": [{"id": 189, "nombre": "Coordinación de los Servicios de Cómputo", "nivel": "Planta baja", "piso": 0}]}, {"id": 11, "nombre": "Tlaltícpac", "lugares": [{"id": 646, "nombre": "Departamento de Personal Académico", "nivel": "Planta Baja", "piso": 0}, {"id": 458, "nombre": "101", "nivel": "Primer Piso", "piso": 1}, {"id": 459, "nombre": "102", "nivel": "Primer Piso", "piso": 1}, {"id": 460, "nombre": "103", "nivel": "Primer Piso", "piso": 1}, {"id": 461, "nombre": "104", "nivel": "Primer Piso", "piso": 1}, {"id": 462, "nombre": "201", "nivel": "Segundo Piso", "piso": 2}, {"id": 463, "nombre": "202", "nivel": "Segundo Piso", "piso": 2}, {"id": 464, "nombre": "203", "nivel": "Segundo Piso", "piso": 2}, {"id": 469, "nombre": "204", "nivel": "Segundo Piso", "piso": 2}, {"id": 465, "nombre": "300", "nivel": "Tercer Piso", "piso": 3}, {"id": 466, "nombre": "301", "nivel": "Tercer Piso", "piso": 3}, {"id": 467, "nombre": "302", "nivel": "Tercer Piso", "piso": 3}, {"id": 468, "nombre": "303", "nivel": "Tercer Piso", "piso": 3}, {"id": 470, "nombre": "304", "nivel": "Tercer Piso", "piso": 3}]}, {"id": 10, "nombre": "Yelizcalli", "lugares": [{"id": 430, "nombre": "001", "nivel": "Planta Baja", "piso": 0}, {"id": 431, "nombre": "002", "nivel": "Planta Baja", "piso": 0}, {"id": 432, "nombre": "003", "nivel": "Planta Baja", "piso": 0}, {"id": 433, "nombre": "004", "nivel": "Planta Baja", "piso": 0}, {"id": 434, "nombre": "Auditorio", "nivel": "Planta Baja", "piso": 0}, {"id": 435, "nombre": "101", "nivel": "Primer Piso", "piso": 1}, {"id": 436, "nombre": "102", "nivel": "Primer Piso", "piso": 1}, {"id": 437, "nombre": "103", "nivel": "Primer Piso", "piso": 1}, {"id": 438, "nombre": "104", "nivel": "Primer Piso", "piso": 1}, {"id": 439, "nombre": "105", "nivel": "Primer Piso", "piso": 1}, {"id": 440, "nombre": "106", "nivel": "Primer Piso", "piso": 1}, {"id": 441, "nombre": "201", "nivel": "Segundo Piso", "piso": 2}, {"id": 442, "nombre": "202", "nivel": "Segundo Piso", "piso": 2}, {"id": 443, "nombre": "203", "nivel": "Segundo Piso", "piso": 2}, {"id": 444, "nombre": "204", "nivel": "Segundo Piso", "piso": 2}, {"id": 445, "nombre": "205", "nivel": "Segundo Piso", "piso": 2}, {"id": 446, "nombre": "206", "nivel": "Segundo Piso", "piso": 2}, {"id": 447, "nombre": "301", "nivel": "Tercer Piso", "piso": 3}, {"id": 448, "nombre": "302", "nivel": "Tercer Piso", "piso": 3}, {"id": 449, "nombre": "303", "nivel": "Tercer Piso", "piso": 3}, {"id": 450, "nombre": "304", "nivel": "Tercer Piso", "piso": 3}, {"id": 451, "nombre": "305", "nivel": "Tercer Piso", "piso": 3}, {"id": 452, "nombre": "306", "nivel": "Tercer Piso", "piso": 3}]}]</script>
+<dialog id="dlg">
+  <form method="dialog">
+    <h2 id="d-titulo"></h2>
+    <div id="d-vertical" class="ajustes">
+      <label for="d-llegada">Piso de llegada <select id="d-llegada"></select></label>
+      <label for="d-escalones" class="solo-esc">Escalones <input id="d-escalones" type="number" inputmode="numeric" min="0" step="1"></label>
+      <label for="d-descansos" class="solo-esc">Descansos <input id="d-descansos" type="number" inputmode="numeric" min="0" step="1"></label>
+      <label for="d-desnivel" class="solo-desnivel">Desnivel (m, opcional) <input id="d-desnivel" type="number" inputmode="decimal" step="0.01"></label>
+    </div>
+    <fieldset>
+      <legend>¿Es uno de estos? (mismo piso, a menos de 15 m)</legend>
+      <div id="d-lista"></div>
+    </fieldset>
+    <div id="d-nuevo" class="ajustes">
+      <label for="d-tipo">Tipo <select id="d-tipo"></select></label>
+      <label for="d-edificio">Edificio <select id="d-edificio"></select></label>
+      <label for="d-nombre">Nombre (opcional) <input id="d-nombre" type="text" autocomplete="off"></label>
+      <label for="d-nota">Nota <input id="d-nota" type="text" autocomplete="off"></label>
+    </div>
+    <menu>
+      <button type="submit" class="boton" value="cancelar" formnovalidate>Cancelar</button>
+      <button type="submit" class="boton primario" value="ok">Aceptar</button>
+    </menu>
+  </form>
+</dialog>
+
+<script type="application/json" id="catalogo">[{"id": 1, "nombre": "Edificio Poniente", "lugares": [{"id": 194, "nombre": "Coordinación de Servicios Editoriales", "nivel": "Sótano", "piso": -1}, {"id": 645, "nombre": "Departamento de Bienes y Suministros", "nivel": "Planta Baja", "piso": 0}, {"id": 494, "nombre": "Departamento de Contabilidad y Presupuesto", "nivel": "Planta Baja", "piso": 0}, {"id": 496, "nombre": "Departamento de Personal Adminstrativo", "nivel": "Planta Baja", "piso": 0}, {"id": 495, "nombre": "Departamento de Servicios Admistrativos Prácticas de campo", "nivel": "Planta Baja", "piso": 0}, {"id": 186, "nombre": "División de Estudios Profesionales", "nivel": "Planta Baja", "piso": 0}, {"id": 187, "nombre": "Oficina de la DGAE", "nivel": "Planta Baja", "piso": 0}, {"id": 594, "nombre": "Pagaduría", "nivel": "Planta Baja", "piso": 0}, {"id": 455, "nombre": "Sala de Exámenes Profesionales", "nivel": "Planta Baja", "piso": 0}, {"id": 180, "nombre": "Secretaría Administrativa", "nivel": "Planta Baja", "piso": 0}, {"id": 497, "nombre": "Vigilancia 1", "nivel": "Planta Baja", "piso": 0}, {"id": 498, "nombre": "Vigilancia 2", "nivel": "Planta Baja", "piso": 0}, {"id": 323, "nombre": "Aula Magna P", "nivel": "Primer Piso", "piso": 1}, {"id": 1, "nombre": "P101", "nivel": "Primer Piso", "piso": 1}, {"id": 2, "nombre": "P102", "nivel": "Primer Piso", "piso": 1}, {"id": 3, "nombre": "P103", "nivel": "Primer Piso", "piso": 1}, {"id": 4, "nombre": "P104", "nivel": "Primer Piso", "piso": 1}, {"id": 5, "nombre": "P105", "nivel": "Primer Piso", "piso": 1}, {"id": 6, "nombre": "P106", "nivel": "Primer Piso", "piso": 1}, {"id": 7, "nombre": "P107", "nivel": "Primer Piso", "piso": 1}, {"id": 8, "nombre": "P108", "nivel": "Primer Piso", "piso": 1}, {"id": 9, "nombre": "P109", "nivel": "Primer Piso", "piso": 1}, {"id": 10, "nombre": "P110", "nivel": "Primer Piso", "piso": 1}, {"id": 11, "nombre": "P111", "nivel": "Primer Piso", "piso": 1}, {"id": 12, "nombre": "P112", "nivel": "Primer Piso", "piso": 1}, {"id": 13, "nombre": "P113", "nivel": "Primer Piso", "piso": 1}, {"id": 14, "nombre": "P114", "nivel": "Primer Piso", "piso": 1}, {"id": 15, "nombre": "P115", "nivel": "Primer Piso", "piso": 1}, {"id": 16, "nombre": "P116", "nivel": "Primer Piso", "piso": 1}, {"id": 17, "nombre": "P117", "nivel": "Primer Piso", "piso": 1}, {"id": 18, "nombre": "P118", "nivel": "Primer Piso", "piso": 1}, {"id": 484, "nombre": "Aula Magna Juan de Oyarzabal", "nivel": "Segundo Piso", "piso": 2}, {"id": 19, "nombre": "P201", "nivel": "Segundo Piso", "piso": 2}, {"id": 20, "nombre": "P202", "nivel": "Segundo Piso", "piso": 2}, {"id": 21, "nombre": "P203", "nivel": "Segundo Piso", "piso": 2}, {"id": 22, "nombre": "P204", "nivel": "Segundo Piso", "piso": 2}, {"id": 23, "nombre": "P205", "nivel": "Segundo Piso", "piso": 2}, {"id": 24, "nombre": "P206", "nivel": "Segundo Piso", "piso": 2}, {"id": 25, "nombre": "P207", "nivel": "Segundo Piso", "piso": 2}, {"id": 26, "nombre": "P208", "nivel": "Segundo Piso", "piso": 2}, {"id": 27, "nombre": "P209", "nivel": "Segundo Piso", "piso": 2}, {"id": 28, "nombre": "P210", "nivel": "Segundo Piso", "piso": 2}, {"id": 29, "nombre": "P211", "nivel": "Segundo Piso", "piso": 2}, {"id": 30, "nombre": "P212", "nivel": "Segundo Piso", "piso": 2}, {"id": 31, "nombre": "P213", "nivel": "Segundo Piso", "piso": 2}], "prefijo": "PO", "mapa": 1}, {"id": 2, "nombre": "Edificio Oriente", "lugares": [{"id": 490, "nombre": "Coordinación de Comisión de Equidad", "nivel": "Planta baja", "piso": 0}, {"id": 488, "nombre": "Coordinación del Consejo Técnico", "nivel": "Planta baja", "piso": 0}, {"id": 492, "nombre": "Correspondencia", "nivel": "Planta baja", "piso": 0}, {"id": 493, "nombre": "Delegación Sindical", "nivel": "Planta baja", "piso": 0}, {"id": 178, "nombre": "Dirección", "nivel": "Planta baja", "piso": 0}, {"id": 491, "nombre": "División Acádemica de Investigación y de Posgrado", "nivel": "Planta baja", "piso": 0}, {"id": 489, "nombre": "Oficina de Atención al Personal de Asignatura", "nivel": "Planta baja", "piso": 0}, {"id": 329, "nombre": "Sala del Consejo Técnico", "nivel": "Planta baja", "piso": 0}, {"id": 183, "nombre": "Secretaría de Vinculación", "nivel": "Planta baja", "piso": 0}, {"id": 179, "nombre": "Secretaría General", "nivel": "Planta baja", "piso": 0}, {"id": 32, "nombre": "O121", "nivel": "Primer Piso", "piso": 1}, {"id": 33, "nombre": "O122", "nivel": "Primer Piso", "piso": 1}, {"id": 34, "nombre": "O123", "nivel": "Primer Piso", "piso": 1}, {"id": 35, "nombre": "O124", "nivel": "Primer Piso", "piso": 1}, {"id": 36, "nombre": "O125", "nivel": "Primer Piso", "piso": 1}, {"id": 37, "nombre": "O126", "nivel": "Primer Piso", "piso": 1}, {"id": 38, "nombre": "O127", "nivel": "Primer Piso", "piso": 1}, {"id": 39, "nombre": "O128", "nivel": "Primer Piso", "piso": 1}, {"id": 40, "nombre": "O129", "nivel": "Primer Piso", "piso": 1}, {"id": 41, "nombre": "O130", "nivel": "Primer Piso", "piso": 1}, {"id": 42, "nombre": "O131", "nivel": "Primer Piso", "piso": 1}, {"id": 43, "nombre": "O132", "nivel": "Primer Piso", "piso": 1}, {"id": 44, "nombre": "O133", "nivel": "Primer Piso", "piso": 1}, {"id": 45, "nombre": "O134", "nivel": "Primer Piso", "piso": 1}, {"id": 46, "nombre": "O214", "nivel": "Segundo Piso", "piso": 2}, {"id": 47, "nombre": "O215", "nivel": "Segundo Piso", "piso": 2}, {"id": 48, "nombre": "O216", "nivel": "Segundo Piso", "piso": 2}, {"id": 49, "nombre": "O217", "nivel": "Segundo Piso", "piso": 2}, {"id": 50, "nombre": "O218", "nivel": "Segundo Piso", "piso": 2}, {"id": 51, "nombre": "O219", "nivel": "Segundo Piso", "piso": 2}, {"id": 52, "nombre": "O220", "nivel": "Segundo Piso", "piso": 2}, {"id": 53, "nombre": "O221", "nivel": "Segundo Piso", "piso": 2}, {"id": 54, "nombre": "O222", "nivel": "Segundo Piso", "piso": 2}, {"id": 55, "nombre": "O223", "nivel": "Segundo Piso", "piso": 2}], "prefijo": "OR", "mapa": 2}, {"id": 9, "nombre": "Ex Biblioteca", "lugares": [{"id": 189, "nombre": "Coordinación de los Servicios de Cómputo", "nivel": "Planta baja", "piso": 0}], "prefijo": "EB", "mapa": 3}, {"id": 5, "nombre": "Edificio de Física", "lugares": [{"id": 88, "nombre": "Laboratorio de Física General I", "nivel": "Planta baja", "piso": 0}, {"id": 89, "nombre": "Laboratorio de Física General II", "nivel": "Planta baja", "piso": 0}, {"id": 90, "nombre": "Laboratorio de Física General III", "nivel": "Planta baja", "piso": 0}, {"id": 92, "nombre": "Laboratorio de Física General V", "nivel": "Planta baja", "piso": 0}, {"id": 93, "nombre": "Laboratorio de Física General VI", "nivel": "Planta baja", "piso": 0}, {"id": 94, "nombre": "Laboratorio de Mecánica I", "nivel": "Planta baja", "piso": 0}, {"id": 95, "nombre": "Laboratorio de Mecánica II", "nivel": "Planta baja", "piso": 0}, {"id": 96, "nombre": "Laboratorio de Mecánica III", "nivel": "Planta baja", "piso": 0}, {"id": 91, "nombre": "Taller Interdisciplinario de Física y Biomedicina III", "nivel": "Planta baja", "piso": 0}, {"id": 487, "nombre": "Consejo Departamental de Física", "nivel": "Primer Piso", "piso": 1}, {"id": 97, "nombre": "Laboratorio de Calor, Ondas y Fluidos I", "nivel": "Primer Piso", "piso": 1}, {"id": 98, "nombre": "Laboratorio de Calor, Ondas y Fluidos II", "nivel": "Primer Piso", "piso": 1}, {"id": 300, "nombre": "Laboratorio de Electromagnetismo I", "nivel": "Primer Piso", "piso": 1}, {"id": 301, "nombre": "Laboratorio de Electromagnetismo II", "nivel": "Primer Piso", "piso": 1}, {"id": 101, "nombre": "Laboratorio de Electrónica I", "nivel": "Primer Piso", "piso": 1}, {"id": 102, "nombre": "Laboratorio de Electrónica II", "nivel": "Primer Piso", "piso": 1}, {"id": 299, "nombre": "Laboratorio de Óptica I", "nivel": "Primer Piso", "piso": 1}, {"id": 103, "nombre": "Laboratorio de Óptica II", "nivel": "Primer Piso", "piso": 1}, {"id": 308, "nombre": "Aula 1 de Computación en Física", "nivel": "Segundo Piso", "piso": 2}, {"id": 309, "nombre": "Aula 2 de Computación en Física", "nivel": "Segundo Piso", "piso": 2}, {"id": 304, "nombre": "Aula 3 de Computación en Física", "nivel": "Segundo Piso", "piso": 2}, {"id": 108, "nombre": "Laboratorio de Física Moderna I", "nivel": "Segundo Piso", "piso": 2}, {"id": 109, "nombre": "Laboratorio de Física Moderna II", "nivel": "Segundo Piso", "piso": 2}, {"id": 528, "nombre": "Laboratorio de Mecanobiología del Músculo", "nivel": "Segundo Piso", "piso": 2}, {"id": 302, "nombre": "Laboratorio Libre I", "nivel": "Segundo Piso", "piso": 2}, {"id": 106, "nombre": "Sala de Proyecciones ", "nivel": "Segundo Piso", "piso": 2}, {"id": 532, "nombre": "Secretaría Técnica de la Licenciatura en Ciencias de la Tierra", "nivel": "Segundo Piso", "piso": 2}, {"id": 533, "nombre": "Secretaría Técnica de la Licenciatura en Física", "nivel": "Segundo Piso", "piso": 2}, {"id": 534, "nombre": "Secretaría Técnica de la Licenciatura en Física Biomédica", "nivel": "Segundo Piso", "piso": 2}, {"id": 529, "nombre": "Sociedad Mexicana de Física", "nivel": "Segundo Piso", "piso": 2}, {"id": 566, "nombre": "Cubículo 302", "nivel": "Tercer Piso", "piso": 3}, {"id": 567, "nombre": "Cubículo 303", "nivel": "Tercer Piso", "piso": 3}, {"id": 568, "nombre": "Cubículo 304", "nivel": "Tercer Piso", "piso": 3}, {"id": 569, "nombre": "Cubículo 305", "nivel": "Tercer Piso", "piso": 3}, {"id": 570, "nombre": "Cubículo 305A", "nivel": "Tercer Piso", "piso": 3}, {"id": 571, "nombre": "Cubículo 306", "nivel": "Tercer Piso", "piso": 3}, {"id": 572, "nombre": "Cubículo 307", "nivel": "Tercer Piso", "piso": 3}, {"id": 573, "nombre": "Cubículo 308", "nivel": "Tercer Piso", "piso": 3}, {"id": 574, "nombre": "Cubículo 309", "nivel": "Tercer Piso", "piso": 3}, {"id": 575, "nombre": "Cubículo 310", "nivel": "Tercer Piso", "piso": 3}, {"id": 576, "nombre": "Cubículo 311", "nivel": "Tercer Piso", "piso": 3}, {"id": 577, "nombre": "Cubículo 312", "nivel": "Tercer Piso", "piso": 3}, {"id": 578, "nombre": "Cubículo 313", "nivel": "Tercer Piso", "piso": 3}, {"id": 579, "nombre": "Cubículo 314", "nivel": "Tercer Piso", "piso": 3}, {"id": 580, "nombre": "Cubículo 315", "nivel": "Tercer Piso", "piso": 3}, {"id": 581, "nombre": "Cubículo 316", "nivel": "Tercer Piso", "piso": 3}, {"id": 582, "nombre": "Cubículo 317", "nivel": "Tercer Piso", "piso": 3}, {"id": 583, "nombre": "Cubículo 318", "nivel": "Tercer Piso", "piso": 3}, {"id": 584, "nombre": "Cubículo 319", "nivel": "Tercer Piso", "piso": 3}, {"id": 585, "nombre": "Cubículo 320", "nivel": "Tercer Piso", "piso": 3}, {"id": 586, "nombre": "Cubículo 321", "nivel": "Tercer Piso", "piso": 3}, {"id": 587, "nombre": "Cubículo 322", "nivel": "Tercer Piso", "piso": 3}, {"id": 588, "nombre": "Cubículo 323", "nivel": "Tercer Piso", "piso": 3}, {"id": 536, "nombre": "Cubículo Profesores 328", "nivel": "Tercer Piso", "piso": 3}, {"id": 590, "nombre": "Física Atómica y Molecular", "nivel": "Tercer Piso", "piso": 3}, {"id": 522, "nombre": "Laboratorio de Acústica", "nivel": "Tercer Piso", "piso": 3}, {"id": 521, "nombre": "Laboratorio Interdisciplinario", "nivel": "Tercer Piso", "piso": 3}, {"id": 515, "nombre": "Sala de Profesores 329", "nivel": "Tercer Piso", "piso": 3}, {"id": 305, "nombre": "Salón de Seminarios 327", "nivel": "Tercer Piso", "piso": 3}, {"id": 306, "nombre": "Salón de Seminarios 330", "nivel": "Tercer Piso", "piso": 3}, {"id": 457, "nombre": "Sistemas Computacionales y Físicos", "nivel": "Tercer Piso", "piso": 3}, {"id": 539, "nombre": "Cubículo 401", "nivel": "Cuarto Piso", "piso": 4}, {"id": 540, "nombre": "Cubículo 402", "nivel": "Cuarto Piso", "piso": 4}, {"id": 541, "nombre": "Cubículo 403", "nivel": "Cuarto Piso", "piso": 4}, {"id": 542, "nombre": "Cubículo 404", "nivel": "Cuarto Piso", "piso": 4}, {"id": 543, "nombre": "Cubículo 405", "nivel": "Cuarto Piso", "piso": 4}, {"id": 544, "nombre": "Cubículo 406", "nivel": "Cuarto Piso", "piso": 4}, {"id": 545, "nombre": "Cubículo 407", "nivel": "Cuarto Piso", "piso": 4}, {"id": 546, "nombre": "Cubículo 408", "nivel": "Cuarto Piso", "piso": 4}, {"id": 547, "nombre": "Cubículo 409-A", "nivel": "Cuarto Piso", "piso": 4}, {"id": 535, "nombre": "Cubículo 409-B", "nivel": "Cuarto Piso", "piso": 4}, {"id": 548, "nombre": "Cubículo 410", "nivel": "Cuarto Piso", "piso": 4}, {"id": 549, "nombre": "Cubículo 411", "nivel": "Cuarto Piso", "piso": 4}, {"id": 550, "nombre": "Cubículo 412", "nivel": "Cuarto Piso", "piso": 4}, {"id": 551, "nombre": "Cubículo 413", "nivel": "Cuarto Piso", "piso": 4}, {"id": 552, "nombre": "Cubículo 414", "nivel": "Cuarto Piso", "piso": 4}, {"id": 553, "nombre": "Cubículo 415", "nivel": "Cuarto Piso", "piso": 4}, {"id": 554, "nombre": "Cubículo 416", "nivel": "Cuarto Piso", "piso": 4}, {"id": 555, "nombre": "Cubículo 417", "nivel": "Cuarto Piso", "piso": 4}, {"id": 556, "nombre": "Cubículo 418", "nivel": "Cuarto Piso", "piso": 4}, {"id": 557, "nombre": "Cubículo 419", "nivel": "Cuarto Piso", "piso": 4}, {"id": 558, "nombre": "Cubículo 420", "nivel": "Cuarto Piso", "piso": 4}, {"id": 559, "nombre": "Cubículo 421", "nivel": "Cuarto Piso", "piso": 4}, {"id": 560, "nombre": "Cubículo 422", "nivel": "Cuarto Piso", "piso": 4}, {"id": 561, "nombre": "Cubículo 423", "nivel": "Cuarto Piso", "piso": 4}, {"id": 562, "nombre": "Cubículo 424", "nivel": "Cuarto Piso", "piso": 4}, {"id": 563, "nombre": "Cubículo 425", "nivel": "Cuarto Piso", "piso": 4}, {"id": 564, "nombre": "Cubículo 426", "nivel": "Cuarto Piso", "piso": 4}, {"id": 565, "nombre": "Cubículo 427", "nivel": "Cuarto Piso", "piso": 4}, {"id": 589, "nombre": "Cubículos 1-11", "nivel": "Cuarto Piso", "piso": 4}, {"id": 592, "nombre": "Laboratorio de Biofísica 431", "nivel": "Cuarto Piso", "piso": 4}, {"id": 593, "nombre": "Laboratorio de Biofísica de Sistemas Excitables 430", "nivel": "Cuarto Piso", "piso": 4}, {"id": 531, "nombre": "Laboratorio de Cómputo 435", "nivel": "Cuarto Piso", "piso": 4}, {"id": 520, "nombre": "Laboratorio de Fluidos 428", "nivel": "Cuarto Piso", "piso": 4}, {"id": 530, "nombre": "Sala de Cómputo del personal Académico 434", "nivel": "Cuarto Piso", "piso": 4}, {"id": 114, "nombre": "Salón de Seminarios 429", "nivel": "Cuarto Piso", "piso": 4}, {"id": 115, "nombre": "Salón de Seminarios 436", "nivel": "Cuarto Piso", "piso": 4}], "prefijo": "FI", "mapa": 4}, {"id": 6, "nombre": "Edificio de Matemáticas", "lugares": [{"id": 332, "nombre": "Cubículo 002", "nivel": "Planta baja", "piso": 0}, {"id": 331, "nombre": "Cubículo 003", "nivel": "Planta baja", "piso": 0}, {"id": 333, "nombre": "Cubículo 004", "nivel": "Planta baja", "piso": 0}, {"id": 334, "nombre": "Cubículo 005", "nivel": "Planta baja", "piso": 0}, {"id": 335, "nombre": "Cubículo 006", "nivel": "Planta baja", "piso": 0}, {"id": 336, "nombre": "Cubículo 007", "nivel": "Planta baja", "piso": 0}, {"id": 337, "nombre": "Cubículo 008", "nivel": "Planta baja", "piso": 0}, {"id": 338, "nombre": "Cubículo 010", "nivel": "Planta baja", "piso": 0}, {"id": 339, "nombre": "Cubículo 011", "nivel": "Planta baja", "piso": 0}, {"id": 340, "nombre": "Cubículo 012", "nivel": "Planta baja", "piso": 0}, {"id": 341, "nombre": "Cubículo 013", "nivel": "Planta baja", "piso": 0}, {"id": 342, "nombre": "Cubículo 014", "nivel": "Planta baja", "piso": 0}, {"id": 343, "nombre": "Cubículo 015", "nivel": "Planta baja", "piso": 0}, {"id": 344, "nombre": "Cubículo 016", "nivel": "Planta baja", "piso": 0}, {"id": 345, "nombre": "Cubículo 017", "nivel": "Planta baja", "piso": 0}, {"id": 346, "nombre": "Cubículo 018", "nivel": "Planta baja", "piso": 0}, {"id": 347, "nombre": "Cubículo 019", "nivel": "Planta baja", "piso": 0}, {"id": 348, "nombre": "Cubículo 020", "nivel": "Planta baja", "piso": 0}, {"id": 349, "nombre": "Cubículo 021", "nivel": "Planta baja", "piso": 0}, {"id": 350, "nombre": "Cubículo 022", "nivel": "Planta baja", "piso": 0}, {"id": 351, "nombre": "Cubículo 023", "nivel": "Planta baja", "piso": 0}, {"id": 352, "nombre": "Cubículo 024", "nivel": "Planta baja", "piso": 0}, {"id": 353, "nombre": "Cubículo 025", "nivel": "Planta baja", "piso": 0}, {"id": 354, "nombre": "Cubículo 026", "nivel": "Planta baja", "piso": 0}, {"id": 355, "nombre": "Cubículo 027", "nivel": "Planta baja", "piso": 0}, {"id": 356, "nombre": "Cubículo 028", "nivel": "Planta baja", "piso": 0}, {"id": 357, "nombre": "Cubículo 029", "nivel": "Planta baja", "piso": 0}, {"id": 358, "nombre": "Cubículo 030", "nivel": "Planta baja", "piso": 0}, {"id": 359, "nombre": "Cubículo 033", "nivel": "Planta baja", "piso": 0}, {"id": 360, "nombre": "Cubículo 034", "nivel": "Planta baja", "piso": 0}, {"id": 361, "nombre": "Cubículo 100", "nivel": "Primer Piso", "piso": 1}, {"id": 362, "nombre": "Cubículo 101", "nivel": "Primer Piso", "piso": 1}, {"id": 363, "nombre": "Cubículo 102", "nivel": "Primer Piso", "piso": 1}, {"id": 364, "nombre": "Cubículo 103", "nivel": "Primer Piso", "piso": 1}, {"id": 365, "nombre": "Cubículo 104", "nivel": "Primer Piso", "piso": 1}, {"id": 366, "nombre": "Cubículo 105", "nivel": "Primer Piso", "piso": 1}, {"id": 367, "nombre": "Cubículo 106", "nivel": "Primer Piso", "piso": 1}, {"id": 368, "nombre": "Cubículo 107", "nivel": "Primer Piso", "piso": 1}, {"id": 369, "nombre": "Cubículo 108", "nivel": "Primer Piso", "piso": 1}, {"id": 370, "nombre": "Cubículo 109", "nivel": "Primer Piso", "piso": 1}, {"id": 371, "nombre": "Cubículo 110", "nivel": "Primer Piso", "piso": 1}, {"id": 372, "nombre": "Cubículo 111", "nivel": "Primer Piso", "piso": 1}, {"id": 373, "nombre": "Cubículo 112", "nivel": "Primer Piso", "piso": 1}, {"id": 374, "nombre": "Cubículo 113", "nivel": "Primer Piso", "piso": 1}, {"id": 375, "nombre": "Cubículo 114", "nivel": "Primer Piso", "piso": 1}, {"id": 376, "nombre": "Cubículo 115", "nivel": "Primer Piso", "piso": 1}, {"id": 377, "nombre": "Cubículo 116", "nivel": "Primer Piso", "piso": 1}, {"id": 378, "nombre": "Cubículo 117", "nivel": "Primer Piso", "piso": 1}, {"id": 379, "nombre": "Cubículo 118", "nivel": "Primer Piso", "piso": 1}, {"id": 380, "nombre": "Cubículo 119", "nivel": "Primer Piso", "piso": 1}, {"id": 381, "nombre": "Cubículo 120", "nivel": "Primer Piso", "piso": 1}, {"id": 382, "nombre": "Cubículo 121", "nivel": "Primer Piso", "piso": 1}, {"id": 383, "nombre": "Cubículo 122", "nivel": "Primer Piso", "piso": 1}, {"id": 384, "nombre": "Cubículo 123", "nivel": "Primer Piso", "piso": 1}, {"id": 385, "nombre": "Cubículo 124", "nivel": "Primer Piso", "piso": 1}, {"id": 386, "nombre": "Cubículo 125", "nivel": "Primer Piso", "piso": 1}, {"id": 387, "nombre": "Cubículo 126", "nivel": "Primer Piso", "piso": 1}, {"id": 388, "nombre": "Cubículo 127", "nivel": "Primer Piso", "piso": 1}, {"id": 389, "nombre": "Cubículo 130", "nivel": "Primer Piso", "piso": 1}, {"id": 390, "nombre": "Cubículo 131", "nivel": "Primer Piso", "piso": 1}, {"id": 391, "nombre": "Cubículo 132", "nivel": "Primer Piso", "piso": 1}, {"id": 116, "nombre": "Salón de Seminarios S-102", "nivel": "Primer Piso", "piso": 1}, {"id": 117, "nombre": "Salón de Seminarios S-104", "nivel": "Primer Piso", "piso": 1}, {"id": 118, "nombre": "Salón de Seminarios S-105", "nivel": "Primer Piso", "piso": 1}, {"id": 392, "nombre": "Cubículo 202", "nivel": "Segundo Piso", "piso": 2}, {"id": 393, "nombre": "Cubículo 203", "nivel": "Segundo Piso", "piso": 2}, {"id": 394, "nombre": "Cubículo 204", "nivel": "Segundo Piso", "piso": 2}, {"id": 395, "nombre": "Cubículo 205", "nivel": "Segundo Piso", "piso": 2}, {"id": 396, "nombre": "Cubículo 208", "nivel": "Segundo Piso", "piso": 2}, {"id": 397, "nombre": "Cubículo 209", "nivel": "Segundo Piso", "piso": 2}, {"id": 398, "nombre": "Cubículo 210", "nivel": "Segundo Piso", "piso": 2}, {"id": 399, "nombre": "Cubículo 211", "nivel": "Segundo Piso", "piso": 2}, {"id": 400, "nombre": "Cubículo 212", "nivel": "Segundo Piso", "piso": 2}, {"id": 401, "nombre": "Cubículo 213", "nivel": "Segundo Piso", "piso": 2}, {"id": 402, "nombre": "Cubículo 214", "nivel": "Segundo Piso", "piso": 2}, {"id": 403, "nombre": "Cubículo 215", "nivel": "Segundo Piso", "piso": 2}, {"id": 404, "nombre": "Cubículo 217", "nivel": "Segundo Piso", "piso": 2}, {"id": 405, "nombre": "Cubículo 219", "nivel": "Segundo Piso", "piso": 2}, {"id": 406, "nombre": "Cubículo 220", "nivel": "Segundo Piso", "piso": 2}, {"id": 407, "nombre": "Cubículo 221", "nivel": "Segundo Piso", "piso": 2}, {"id": 408, "nombre": "Cubículo 223", "nivel": "Segundo Piso", "piso": 2}, {"id": 409, "nombre": "Cubículo 224", "nivel": "Segundo Piso", "piso": 2}, {"id": 410, "nombre": "Cubículo 225", "nivel": "Segundo Piso", "piso": 2}, {"id": 411, "nombre": "Cubículo 226", "nivel": "Segundo Piso", "piso": 2}, {"id": 412, "nombre": "Cubículo 227", "nivel": "Segundo Piso", "piso": 2}, {"id": 413, "nombre": "Cubículo 228", "nivel": "Segundo Piso", "piso": 2}, {"id": 414, "nombre": "Cubículo 229", "nivel": "Segundo Piso", "piso": 2}, {"id": 415, "nombre": "Cubículo 230", "nivel": "Segundo Piso", "piso": 2}, {"id": 416, "nombre": "Cubículo 231", "nivel": "Segundo Piso", "piso": 2}, {"id": 417, "nombre": "Cubículo 232", "nivel": "Segundo Piso", "piso": 2}, {"id": 418, "nombre": "Cubículo 233", "nivel": "Segundo Piso", "piso": 2}, {"id": 419, "nombre": "Cubículo 234", "nivel": "Segundo Piso", "piso": 2}, {"id": 420, "nombre": "Cubículo 235", "nivel": "Segundo Piso", "piso": 2}, {"id": 421, "nombre": "Cubículo 236", "nivel": "Segundo Piso", "piso": 2}, {"id": 422, "nombre": "Cubículo 237", "nivel": "Segundo Piso", "piso": 2}, {"id": 423, "nombre": "Cubículo 238", "nivel": "Segundo Piso", "piso": 2}, {"id": 424, "nombre": "Cubículo 239", "nivel": "Segundo Piso", "piso": 2}, {"id": 425, "nombre": "Cubículo 241", "nivel": "Segundo Piso", "piso": 2}, {"id": 426, "nombre": "Cubículo 242", "nivel": "Segundo Piso", "piso": 2}, {"id": 427, "nombre": "Cubículo 243", "nivel": "Segundo Piso", "piso": 2}, {"id": 428, "nombre": "Cubículo 244", "nivel": "Segundo Piso", "piso": 2}], "prefijo": "MA", "mapa": 5}, {"id": 3, "nombre": "Edificio A de Biología", "lugares": [{"id": 203, "nombre": "B009", "nivel": "Planta baja", "piso": 0}, {"id": "ABL01", "nombre": "Laboratorio de Genética, Evolución y Educación", "nivel": "Planta baja", "piso": 0, "fuente": "https://www.fciencias.unam.mx/investigacion/biologia-celular/laboratorios/genetica-evolucion-y-educacion"}, {"id": "ABL02", "nombre": "Laboratorio de Genética, Toxicología Ambiental y Banco de Moscas", "nivel": "Planta baja", "piso": 0, "fuente": "https://www.fciencias.unam.mx/investigacion/biologia-celular/laboratorios/genetica-toxicologia-ambiental-banco-moscas"}, {"id": "ABL03", "nombre": "Laboratorio de Nanobiología Celular", "nivel": "Planta baja", "piso": 0, "fuente": "https://www.fciencias.unam.mx/investigacion/biologia-celular/laboratorios/nanobiologia-celular"}, {"id": "ABL04", "nombre": "Ecología Microbiana Funcional del Suelo y Protección Ambiental", "nivel": "Planta baja", "piso": 0, "fuente": "https://www.fciencias.unam.mx/investigacion/ecologia-y-rn/ecologia-microbiana"}, {"id": "ABL05", "nombre": "Laboratorio de Biogeografía de la Conservación", "nivel": "Primer Piso", "piso": 1, "fuente": "https://www.fciencias.unam.mx/vida-en-ciencias/instalaciones/instalaciones-academicas/laboratorios/biogeografia-conservacion"}, {"id": "ABL06", "nombre": "Laboratorio de Origen de la Vida", "nivel": "Primer Piso", "piso": 1, "fuente": "https://www.fciencias.unam.mx/vida-en-ciencias/instalaciones/instalaciones-academicas/laboratorios/laborigenvida"}, {"id": "ABL07", "nombre": "Laboratorio de Antropología Molecular", "nivel": "Segundo Piso", "piso": 2, "fuente": "https://www.fciencias.unam.mx/investigacion/biologia-celular/laboratorios/antropologia-molecular"}, {"id": "ABL08", "nombre": "Laboratorio de Biología Molecular y Genómica", "nivel": "Segundo Piso", "piso": 2, "fuente": "https://www.fciencias.unam.mx/investigacion/biologia-celular/laboratorios/biologia-molecular-y-genomica"}, {"id": "ABL09", "nombre": "Laboratorio de Genómica Ambiental", "nivel": "Segundo Piso", "piso": 2, "fuente": "https://www.fciencias.unam.mx/investigacion/biologia-celular/laboratorios/genomica-ambiental"}, {"id": "ABL10", "nombre": "Laboratorio de Etnofarmacología", "nivel": "Segundo Piso", "piso": 2, "fuente": "https://www.fciencias.unam.mx/investigacion/biologia-celular/laboratorios/etnofarmacologia"}, {"id": "ABL11", "nombre": "Algas Continentales. Ecología y Taxonomía", "nivel": "Tercer Piso", "piso": 3, "fuente": "https://www.fciencias.unam.mx/investigacion/ecologia-y-rn/algas-continentales"}, {"id": "ABL12", "nombre": "Laboratorio de Plantas Vasculares", "nivel": "Tercer Piso", "piso": 3, "fuente": "https://www.fciencias.unam.mx/investigacion/biologia-comparada/plantas-vasculares"}, {"id": "ABL13", "nombre": "Estructura y Fisiología de Plantas", "nivel": "Tercer Piso", "piso": 3, "fuente": "https://www.fciencias.unam.mx/investigacion/ecologia-y-rn/estructura-y-fisiologia-plantas"}], "prefijo": "AB", "mapa": 6}, {"id": 4, "nombre": "Edificio B de Biología", "lugares": [{"id": 296, "nombre": "Sala de Cómputo I", "nivel": "Planta baja", "piso": 0}, {"id": 297, "nombre": "Sala de Cómputo II", "nivel": "Planta baja", "piso": 0}, {"id": 298, "nombre": "Sala de Cómputo III", "nivel": "Planta baja", "piso": 0}, {"id": "BBL01", "nombre": "Laboratorio de Microscopía Electrónica «Gerardo Hebert Vázquez Nin»", "nivel": "Planta baja", "piso": 0, "fuente": "https://www.fciencias.unam.mx/investigacion/biologia-celular/laboratorios/microscopia-electronica"}, {"id": 195, "nombre": "B001", "nivel": "Primer Piso", "piso": 1}, {"id": 196, "nombre": "B002", "nivel": "Primer Piso", "piso": 1}, {"id": 197, "nombre": "B003", "nivel": "Primer Piso", "piso": 1}, {"id": 198, "nombre": "B004", "nivel": "Primer Piso", "piso": 1}, {"id": 199, "nombre": "B005", "nivel": "Primer Piso", "piso": 1}, {"id": 200, "nombre": "B006", "nivel": "Primer Piso", "piso": 1}, {"id": 201, "nombre": "B007", "nivel": "Primer Piso", "piso": 1}, {"id": 202, "nombre": "B008", "nivel": "Primer Piso", "piso": 1}, {"id": "BBL02", "nombre": "Ecología y Diversidad Vegetal", "nivel": "Primer Piso", "piso": 1, "fuente": "https://www.fciencias.unam.mx/investigacion/ecologia-y-rn/diversidad-vegetal"}, {"id": "BBL03", "nombre": "Ecología y Sistemática de Microartrópodos", "nivel": "Primer Piso", "piso": 1, "fuente": "https://www.fciencias.unam.mx/investigacion/ecologia-y-rn/sistematica-de-microartropodos"}, {"id": "BBL04", "nombre": "Ecología de Poblaciones", "nivel": "Primer Piso", "piso": 1, "fuente": "https://www.fciencias.unam.mx/investigacion/ecologia-y-rn/ecologia-de-poblaciones"}, {"id": "BBL05", "nombre": "Ecosistemas de Montaña", "nivel": "Primer Piso", "piso": 1, "fuente": "https://www.fciencias.unam.mx/investigacion/ecologia-y-rn/ecosistemas-de-montana"}, {"id": "BBL06", "nombre": "Laboratorio de Ecosistemas de Ribera", "nivel": "Primer Piso", "piso": 1, "fuente": "https://www.fciencias.unam.mx/investigacion/ecologia-y-rn/ecosistemas-de-ribera"}, {"id": "BBL07", "nombre": "Laboratorio de Ecotoxicología de Organismos Acuáticos", "nivel": "Primer Piso", "piso": 1, "fuente": "https://www.fciencias.unam.mx/investigacion/ecologia-y-rn/ecotoxicologia-de-oa"}, {"id": "BBL08", "nombre": "Laboratorio de Ecología del Suelo (1er piso)", "nivel": "Primer Piso", "piso": 1, "fuente": "https://www.fciencias.unam.mx/vida-en-ciencias/instalaciones/instalaciones-academicas/laboratorios/lab-ecologiasuelo"}, {"id": "BBL09", "nombre": "Interacciones y Procesos Ecológicos (1er piso)", "nivel": "Primer Piso", "piso": 1, "fuente": "https://www.fciencias.unam.mx/investigacion/ecologia-y-rn/interacciones-y-procesos"}, {"id": "BBL10", "nombre": "Laboratorio de Ecología del Suelo (2o piso)", "nivel": "Segundo Piso", "piso": 2, "fuente": "https://www.fciencias.unam.mx/vida-en-ciencias/instalaciones/instalaciones-academicas/laboratorios/lab-ecologiasuelo"}, {"id": "BBL11", "nombre": "Interacciones y Procesos Ecológicos (2o piso)", "nivel": "Segundo Piso", "piso": 2, "fuente": "https://www.fciencias.unam.mx/investigacion/ecologia-y-rn/interacciones-y-procesos"}, {"id": "BBL12", "nombre": "Ficología (Biodiversidad Marina)", "nivel": "Segundo Piso", "piso": 2, "fuente": "https://www.fciencias.unam.mx/vida-en-ciencias/instalaciones/instalaciones-academicas/laboratorios/ficologia"}, {"id": "BBL13", "nombre": "Laboratorio de Neuroendocrinología Comparada", "nivel": "Segundo Piso", "piso": 2, "fuente": "https://www.fciencias.unam.mx/vida-en-ciencias/instalaciones/instalaciones-academicas/laboratorios/lab-neuroendocrinologia-comparada"}, {"id": "BBL14", "nombre": "Neurofisiología Comparada y Ritmos Biológicos", "nivel": "Segundo Piso", "piso": 2, "fuente": "https://www.fciencias.unam.mx/investigacion/ecologia-y-rn/neurofisiologia-comparada"}, {"id": "BBL15", "nombre": "Laboratorio de Fitoquímica", "nivel": "Segundo Piso", "piso": 2, "fuente": "https://www.fciencias.unam.mx/investigacion/biologia/ecologia-y-recursos-naturales/fitoquimica"}, {"id": "BBL16", "nombre": "Productos Naturales", "nivel": "Segundo Piso", "piso": 2, "fuente": "https://www.fciencias.unam.mx/investigacion/biologia/ecologia-y-recursos-naturales/productos-naturales"}, {"id": "BBL17", "nombre": "Laboratorio de Acarología", "nivel": "Tercer Piso", "piso": 3, "fuente": "https://www.fciencias.unam.mx/vida-en-ciencias/instalaciones/instalaciones-academicas/laboratorios/lab-acarologia"}, {"id": "BBL18", "nombre": "Laboratorio de Protozoología", "nivel": "Tercer Piso", "piso": 3, "fuente": "https://www.fciencias.unam.mx/investigacion/biologia-comparada/protozoologia"}, {"id": "BBL19", "nombre": "Análisis Socioambiental", "nivel": "Tercer Piso", "piso": 3, "fuente": "https://www.fciencias.unam.mx/investigacion/ecologia-y-rn/analisis-socioambiental"}, {"id": "BBL20", "nombre": "Laboratorio de Ecología y Sistemática de Nemátodos", "nivel": "Tercer Piso", "piso": 3, "fuente": "https://www.fciencias.unam.mx/investigacion/ecologia-y-rn/sistematica-de-nematodos"}], "prefijo": "BB", "mapa": 7}, {"id": 11, "nombre": "Tlaltícpac", "lugares": [{"id": 646, "nombre": "Departamento de Personal Académico", "nivel": "Planta Baja", "piso": 0}, {"id": 458, "nombre": "101", "nivel": "Primer Piso", "piso": 1}, {"id": 459, "nombre": "102", "nivel": "Primer Piso", "piso": 1}, {"id": 460, "nombre": "103", "nivel": "Primer Piso", "piso": 1}, {"id": 461, "nombre": "104", "nivel": "Primer Piso", "piso": 1}, {"id": 462, "nombre": "201", "nivel": "Segundo Piso", "piso": 2}, {"id": 463, "nombre": "202", "nivel": "Segundo Piso", "piso": 2}, {"id": 464, "nombre": "203", "nivel": "Segundo Piso", "piso": 2}, {"id": 469, "nombre": "204", "nivel": "Segundo Piso", "piso": 2}, {"id": 465, "nombre": "300", "nivel": "Tercer Piso", "piso": 3}, {"id": 466, "nombre": "301", "nivel": "Tercer Piso", "piso": 3}, {"id": 467, "nombre": "302", "nivel": "Tercer Piso", "piso": 3}, {"id": 468, "nombre": "303", "nivel": "Tercer Piso", "piso": 3}, {"id": 470, "nombre": "304", "nivel": "Tercer Piso", "piso": 3}], "prefijo": "TLA", "mapa": 8}, {"id": 12, "nombre": "Edificio de Talleres", "lugares": [{"id": 525, "nombre": "Archivo", "nivel": "Planta Baja", "piso": 0}, {"id": 523, "nombre": "Coordinación de Mantenimiento", "nivel": "Planta Baja", "piso": 0}, {"id": 514, "nombre": "Cubículo 01 - Actividades Deportivas", "nivel": "Planta Baja", "piso": 0}, {"id": 513, "nombre": "Cubículo 02 - Protección Civil", "nivel": "Planta Baja", "piso": 0}, {"id": 600, "nombre": "Jurídico", "nivel": "Planta Baja", "piso": 0}, {"id": 524, "nombre": "Sala de Juntas Jurídico", "nivel": "Planta Baja", "piso": 0}, {"id": 527, "nombre": "Taller de Carpintería", "nivel": "Planta Baja", "piso": 0}, {"id": 599, "nombre": "Taller de Electrónica", "nivel": "Planta Baja", "piso": 0}, {"id": 601, "nombre": "Taller de Innovación", "nivel": "Planta Baja", "piso": 0}, {"id": 598, "nombre": "Taller de Mantenimiento", "nivel": "Planta Baja", "piso": 0}, {"id": 526, "nombre": "Taller Mecánico", "nivel": "Planta Baja", "piso": 0}, {"id": 605, "nombre": "Aula T1", "nivel": "Primer Piso", "piso": 1}, {"id": 606, "nombre": "Aula T2", "nivel": "Primer Piso", "piso": 1}, {"id": 607, "nombre": "Aula T3", "nivel": "Primer Piso", "piso": 1}, {"id": 608, "nombre": "Salón Área Colaborativa", "nivel": "Primer Piso", "piso": 1}], "prefijo": "TA", "mapa": 9}, {"id": 7, "nombre": "Edificio Tlahuizcalpan", "lugares": [{"id": 120, "nombre": "Aula Magna II", "nivel": "Sótano", "piso": -1}, {"id": 510, "nombre": "Coordinación de Laboratoristas de Biología", "nivel": "Sótano", "piso": -1}, {"id": 538, "nombre": "Cubículo Jefe de Intendencia", "nivel": "Sótano", "piso": -1}, {"id": 511, "nombre": "Intendencia", "nivel": "Sótano", "piso": -1}, {"id": 591, "nombre": "Laboratorio de apoyo de prácticas de campo", "nivel": "Sótano", "piso": -1}, {"id": 327, "nombre": "Laboratorio de Enseñanza de Cómputo de Actuaría", "nivel": "Sótano", "piso": -1}, {"id": 326, "nombre": "Laboratorio de Enseñanza de Cómputo de Matemáticas", "nivel": "Sótano", "piso": -1}, {"id": 307, "nombre": "Laboratorio de Enseñanza en Cómputo en Física", "nivel": "Sótano", "piso": -1}, {"id": 121, "nombre": "Laboratorio de Prácticas de Biología de Plantas I", "nivel": "Sótano", "piso": -1}, {"id": 122, "nombre": "Laboratorio de Prácticas de Biología de Plantas II", "nivel": "Sótano", "piso": -1}, {"id": 123, "nombre": "Laboratorio de Prácticas de Ciencias de la Tierra", "nivel": "Sótano", "piso": -1}, {"id": 124, "nombre": "Laboratorio de Prácticas de Ecología y Recursos Naturales", "nivel": "Sótano", "piso": -1}, {"id": 125, "nombre": "Métodos Básicos de Biología I (antes Laboratorio de Prácticas de Química I)", "nivel": "Sótano", "piso": -1}, {"id": 127, "nombre": "Métodos Básicos de Biología II (antes Laboratorio de Prácticas de Química Orgánica)", "nivel": "Sótano", "piso": -1}, {"id": 126, "nombre": "Química II (antes Laboratorio de Prácticas de Química II)", "nivel": "Sótano", "piso": -1}, {"id": 129, "nombre": "S2", "nivel": "Sótano", "piso": -1}, {"id": 130, "nombre": "S3", "nivel": "Sótano", "piso": -1}, {"id": 131, "nombre": "S4", "nivel": "Sótano", "piso": -1}, {"id": 132, "nombre": "S5", "nivel": "Sótano", "piso": -1}, {"id": 133, "nombre": "S6", "nivel": "Sótano", "piso": -1}, {"id": 320, "nombre": "Taller de Biofísica", "nivel": "Sótano", "piso": -1}, {"id": 134, "nombre": "Taller de Biología de Plantas I y II", "nivel": "Sótano", "piso": -1}, {"id": 135, "nombre": "Taller de Ciencias de la Tierra", "nivel": "Sótano", "piso": -1}, {"id": 310, "nombre": "Taller de Ciencias de Materiales", "nivel": "Sótano", "piso": -1}, {"id": 312, "nombre": "Taller de Colisiones", "nivel": "Sótano", "piso": -1}, {"id": 136, "nombre": "Taller de Ecología y Recursos Naturales", "nivel": "Sótano", "piso": -1}, {"id": 322, "nombre": "Taller de Estado Sólido Computacional", "nivel": "Sótano", "piso": -1}, {"id": 315, "nombre": "Taller de Fluidos", "nivel": "Sótano", "piso": -1}, {"id": 314, "nombre": "Taller de Física de Radiaciones", "nivel": "Sótano", "piso": -1}, {"id": 476, "nombre": "Taller de Hidrodinámica y Turbulencia", "nivel": "Sótano", "piso": -1}, {"id": 477, "nombre": "Taller de Luminiscencia", "nivel": "Sótano", "piso": -1}, {"id": 597, "nombre": "Taller de Luminiscencia y Resonancia Magnética", "nivel": "Sótano", "piso": -1}, {"id": 294, "nombre": "Taller de Microscopía Electrónica", "nivel": "Sótano", "piso": -1}, {"id": 486, "nombre": "Taller de Química", "nivel": "Sótano", "piso": -1}, {"id": 295, "nombre": "Taller de Recursos Naturales", "nivel": "Sótano", "piso": -1}, {"id": 317, "nombre": "Taller de Óptica Avanzada", "nivel": "Sótano", "piso": -1}, {"id": 478, "nombre": "Taller de Óptica Láser", "nivel": "Sótano", "piso": -1}, {"id": 128, "nombre": "Taller Interdisciplinario de Física y Biomedicina I", "nivel": "Sótano", "piso": -1}, {"id": 139, "nombre": "002", "nivel": "Planta Baja", "piso": 0}, {"id": 293, "nombre": "003", "nivel": "Planta Baja", "piso": 0}, {"id": 140, "nombre": "004", "nivel": "Planta Baja", "piso": 0}, {"id": 141, "nombre": "005", "nivel": "Planta Baja", "piso": 0}, {"id": 142, "nombre": "006", "nivel": "Planta Baja", "piso": 0}, {"id": 143, "nombre": "008", "nivel": "Planta Baja", "piso": 0}, {"id": 144, "nombre": "009", "nivel": "Planta Baja", "piso": 0}, {"id": 145, "nombre": "010", "nivel": "Planta Baja", "piso": 0}, {"id": 146, "nombre": "011", "nivel": "Planta Baja", "piso": 0}, {"id": 502, "nombre": "Aula 1a DAIP", "nivel": "Planta Baja", "piso": 0}, {"id": 501, "nombre": "Aula 1b DAIP", "nivel": "Planta Baja", "piso": 0}, {"id": 453, "nombre": "Aula Multifuncional de Ciencias de la Tierra I", "nivel": "Planta Baja", "piso": 0}, {"id": 454, "nombre": "Aula Multifuncional de Ciencias de la Tierra II", "nivel": "Planta Baja", "piso": 0}, {"id": 503, "nombre": "Coordinación de Tlahuizcalpan", "nivel": "Planta Baja", "piso": 0}, {"id": 602, "nombre": "Cubículo Secretaría de Educacíon Abierta y Continua", "nivel": "Planta Baja", "piso": 0}, {"id": 505, "nombre": "Espora", "nivel": "Planta Baja", "piso": 0}, {"id": 330, "nombre": "Laboratorio de Idiomas", "nivel": "Planta Baja", "piso": 0}, {"id": 152, "nombre": "Laboratorio de Prácticas de Biología de Animales I", "nivel": "Planta Baja", "piso": 0}, {"id": 153, "nombre": "Laboratorio de Prácticas de Biología de Animales II", "nivel": "Planta Baja", "piso": 0}, {"id": 154, "nombre": "Laboratorio de Prácticas de Biología de Animales III", "nivel": "Planta Baja", "piso": 0}, {"id": 157, "nombre": "Laboratorio de Prácticas de Biología Molecular de la Célula I", "nivel": "Planta Baja", "piso": 0}, {"id": 158, "nombre": "Laboratorio de Prácticas de Biología Molecular de la Célula II", "nivel": "Planta Baja", "piso": 0}, {"id": 159, "nombre": "Laboratorio de Prácticas de Biología Molecular de la Célula III", "nivel": "Planta Baja", "piso": 0}, {"id": 161, "nombre": "Laboratorio de Prácticas de Biotecnología", "nivel": "Planta Baja", "piso": 0}, {"id": 160, "nombre": "Laboratorio de Prácticas de Genética", "nivel": "Planta Baja", "piso": 0}, {"id": 537, "nombre": "Sala de Maestros, Cubículos Contabilidad, Cubículo Bienes y Suministros", "nivel": "Planta Baja", "piso": 0}, {"id": 479, "nombre": "Secretaría de Asuntos Estudiantiles", "nivel": "Planta Baja", "piso": 0}, {"id": 506, "nombre": "Servicios Generales", "nivel": "Planta Baja", "piso": 0}, {"id": 485, "nombre": "SUHFECIM", "nivel": "Planta Baja", "piso": 0}, {"id": 164, "nombre": "Taller de Análisis Ambiental", "nivel": "Planta Baja", "piso": 0}, {"id": 244, "nombre": "Taller de Análisis Numérico", "nivel": "Planta Baja", "piso": 0}, {"id": 319, "nombre": "Taller de análisis radiológico de muestras ambientales", "nivel": "Planta Baja", "piso": 0}, {"id": 595, "nombre": "Taller de Bioacústica", "nivel": "Planta Baja", "piso": 0}, {"id": 166, "nombre": "Taller de Biología de Animales I", "nivel": "Planta Baja", "piso": 0}, {"id": 167, "nombre": "Taller de Biología de Animales II", "nivel": "Planta Baja", "piso": 0}, {"id": 168, "nombre": "Taller de Biología de Animales III", "nivel": "Planta Baja", "piso": 0}, {"id": 172, "nombre": "Taller de Biología Molecular de la Célula I y II", "nivel": "Planta Baja", "piso": 0}, {"id": 171, "nombre": "Taller de Biología Molecular de la Célula III", "nivel": "Planta Baja", "piso": 0}, {"id": 504, "nombre": "Taller de Ciencia de Materiales", "nivel": "Planta Baja", "piso": 0}, {"id": 507, "nombre": "Taller de Genética", "nivel": "Planta Baja", "piso": 0}, {"id": 318, "nombre": "Taller de Termodinámica", "nivel": "Planta Baja", "piso": 0}, {"id": 499, "nombre": "Taller de Topología", "nivel": "Planta Baja", "piso": 0}, {"id": 311, "nombre": "Taller de Vacío", "nivel": "Planta Baja", "piso": 0}, {"id": 147, "nombre": "101", "nivel": "Primer Piso", "piso": 1}, {"id": 148, "nombre": "102", "nivel": "Primer Piso", "piso": 1}, {"id": 149, "nombre": "103", "nivel": "Primer Piso", "piso": 1}, {"id": 150, "nombre": "Aula Magna I", "nivel": "Primer Piso", "piso": 1}, {"id": 604, "nombre": "Cámara Semianecoica", "nivel": "Primer Piso", "piso": 1}, {"id": 151, "nombre": "Laboratorio de Prácticas de Biogeografía I", "nivel": "Primer Piso", "piso": 1}, {"id": 155, "nombre": "Laboratorio de Prácticas de Biología de Procariontes", "nivel": "Primer Piso", "piso": 1}, {"id": 162, "nombre": "Laboratorio de Prácticas de Paleobiología", "nivel": "Primer Piso", "piso": 1}, {"id": 156, "nombre": "Laboratorio de Prácticas de Protistas y Algas", "nivel": "Primer Piso", "piso": 1}, {"id": 163, "nombre": "Laboratorio de Prácticas de Sistemática I", "nivel": "Primer Piso", "piso": 1}, {"id": 185, "nombre": "Secretaría de Educación Abierta y Continua", "nivel": "Primer Piso", "piso": 1}, {"id": 165, "nombre": "Taller de Biogeografía y Sistemática", "nivel": "Primer Piso", "piso": 1}, {"id": 169, "nombre": "Taller de Biología de Procariontes", "nivel": "Primer Piso", "piso": 1}, {"id": 170, "nombre": "Taller de Biología de Protistas y Algas", "nivel": "Primer Piso", "piso": 1}, {"id": 313, "nombre": "Taller de Control y Electrónica", "nivel": "Primer Piso", "piso": 1}, {"id": 596, "nombre": "Taller de Cómputo General - Técnicos Académicos Matemáticas", "nivel": "Primer Piso", "piso": 1}, {"id": 512, "nombre": "Taller de Cómputo Tlahuizcalpan", "nivel": "Primer Piso", "piso": 1}, {"id": 247, "nombre": "Taller de Demografía", "nivel": "Primer Piso", "piso": 1}, {"id": 475, "nombre": "Taller de Electricidad", "nivel": "Primer Piso", "piso": 1}, {"id": 248, "nombre": "Taller de Estadística", "nivel": "Primer Piso", "piso": 1}, {"id": 245, "nombre": "Taller de Finanzas", "nivel": "Primer Piso", "piso": 1}, {"id": 251, "nombre": "Taller de Geometría", "nivel": "Primer Piso", "piso": 1}, {"id": 249, "nombre": "Taller de Investigación de Operaciones ", "nivel": "Primer Piso", "piso": 1}, {"id": 174, "nombre": "Taller de Paleobiología", "nivel": "Primer Piso", "piso": 1}, {"id": 252, "nombre": "Taller de Sistemas Complejos", "nivel": "Primer Piso", "piso": 1}, {"id": 250, "nombre": "Taller de Álgebra", "nivel": "Primer Piso", "piso": 1}, {"id": 175, "nombre": "201", "nivel": "Segundo Piso", "piso": 2}, {"id": 253, "nombre": "Laboratorio de Ciencias de la Computación 1", "nivel": "Segundo Piso", "piso": 2}, {"id": 254, "nombre": "Laboratorio de Ciencias de la Computación 2", "nivel": "Segundo Piso", "piso": 2}, {"id": 255, "nombre": "Laboratorio de Ciencias de la Computación 3", "nivel": "Segundo Piso", "piso": 2}, {"id": 508, "nombre": "Laboratorio de Dinámica Biofísica y Fisiología de Sistemas", "nivel": "Segundo Piso", "piso": 2}, {"id": 176, "nombre": "Laboratorio de Prácticas de Biología de Hongos", "nivel": "Segundo Piso", "piso": 2}, {"id": 177, "nombre": "Taller de Biología de Hongos", "nivel": "Segundo Piso", "piso": 2}, {"id": 429, "nombre": "Taller de Computación Visual e Innovación Tecnológica ", "nivel": "Segundo Piso", "piso": 2}, {"id": 509, "nombre": "Taller de Física", "nivel": "Segundo Piso", "piso": 2}, {"id": 257, "nombre": "Taller de Ingeniería de Software", "nivel": "Segundo Piso", "piso": 2}, {"id": 256, "nombre": "Taller de Lenguajes de Programación", "nivel": "Segundo Piso", "piso": 2}, {"id": 316, "nombre": "Taller de Meteorología", "nivel": "Segundo Piso", "piso": 2}, {"id": 258, "nombre": "Taller de Sistemas Operativos, Redes de Cómputo, Sistemas Distribuidos y Manejo de Información", "nivel": "Segundo Piso", "piso": 2}, {"id": 259, "nombre": "Taller de Sistemas Simbólicos", "nivel": "Segundo Piso", "piso": 2}, {"id": 516, "nombre": "Técnicos Académicos - Biología 1", "nivel": "Segundo Piso", "piso": 2}, {"id": 519, "nombre": "Técnicos Académicos - Biología 2", "nivel": "Segundo Piso", "piso": 2}, {"id": 518, "nombre": "Técnicos Académicos - Ciencias de la Computación", "nivel": "Segundo Piso", "piso": 2}, {"id": 517, "nombre": "Técnicos Académicos - Coordinación de Cómputo - Proyectos", "nivel": "Segundo Piso", "piso": 2}, {"id": 603, "nombre": "Técnicos Académicos - Coordinación de Cómputo - XFC", "nivel": "Segundo Piso", "piso": 2}], "prefijo": "TL", "mapa": 10}, {"id": 10, "nombre": "Yelizcalli", "lugares": [{"id": 430, "nombre": "001", "nivel": "Planta Baja", "piso": 0}, {"id": 431, "nombre": "002", "nivel": "Planta Baja", "piso": 0}, {"id": 432, "nombre": "003", "nivel": "Planta Baja", "piso": 0}, {"id": 433, "nombre": "004", "nivel": "Planta Baja", "piso": 0}, {"id": 434, "nombre": "Auditorio", "nivel": "Planta Baja", "piso": 0}, {"id": 435, "nombre": "101", "nivel": "Primer Piso", "piso": 1}, {"id": 436, "nombre": "102", "nivel": "Primer Piso", "piso": 1}, {"id": 437, "nombre": "103", "nivel": "Primer Piso", "piso": 1}, {"id": 438, "nombre": "104", "nivel": "Primer Piso", "piso": 1}, {"id": 439, "nombre": "105", "nivel": "Primer Piso", "piso": 1}, {"id": 440, "nombre": "106", "nivel": "Primer Piso", "piso": 1}, {"id": 441, "nombre": "201", "nivel": "Segundo Piso", "piso": 2}, {"id": 442, "nombre": "202", "nivel": "Segundo Piso", "piso": 2}, {"id": 443, "nombre": "203", "nivel": "Segundo Piso", "piso": 2}, {"id": 444, "nombre": "204", "nivel": "Segundo Piso", "piso": 2}, {"id": 445, "nombre": "205", "nivel": "Segundo Piso", "piso": 2}, {"id": 446, "nombre": "206", "nivel": "Segundo Piso", "piso": 2}, {"id": 447, "nombre": "301", "nivel": "Tercer Piso", "piso": 3}, {"id": 448, "nombre": "302", "nivel": "Tercer Piso", "piso": 3}, {"id": 449, "nombre": "303", "nivel": "Tercer Piso", "piso": 3}, {"id": 450, "nombre": "304", "nivel": "Tercer Piso", "piso": 3}, {"id": 451, "nombre": "305", "nivel": "Tercer Piso", "piso": 3}, {"id": 452, "nombre": "306", "nivel": "Tercer Piso", "piso": 3}], "prefijo": "YE", "mapa": 11}, {"id": 8, "nombre": "Amoxcalli", "lugares": [{"id": 619, "nombre": "Adquisiciones y Procesos Técnicos", "nivel": "Vestíbulo", "piso": 0}, {"id": 625, "nombre": "Anfiteatro Alfredo Barrera", "nivel": "Vestíbulo", "piso": 0}, {"id": 620, "nombre": "Audiovisuales", "nivel": "Vestíbulo", "piso": 0}, {"id": 623, "nombre": "Auditorio Carlos Graef", "nivel": "Vestíbulo", "piso": 0}, {"id": 624, "nombre": "Aula Magna Leonila Vázquez", "nivel": "Vestíbulo", "piso": 0}, {"id": 456, "nombre": "Aula Sotero Prieto I", "nivel": "Vestíbulo", "piso": 0}, {"id": 480, "nombre": "Aula Sotero Prieto II", "nivel": "Vestíbulo", "piso": 0}, {"id": 481, "nombre": "Aula Sotero Prieto III", "nivel": "Vestíbulo", "piso": 0}, {"id": 190, "nombre": "Coordinación de los Servicios Bibliotecarios", "nivel": "Vestíbulo", "piso": 0}, {"id": 622, "nombre": "Jefe de Servicios Amoxcalli", "nivel": "Vestíbulo", "piso": 0}, {"id": 621, "nombre": "Pakte", "nivel": "Vestíbulo", "piso": 0}, {"id": 628, "nombre": "Coordinación de Actividades Culturales", "nivel": "Primer Piso", "piso": 1}, {"id": 627, "nombre": "Estancia de Bibliotecarios I", "nivel": "Primer Piso", "piso": 1}, {"id": 626, "nombre": "Sala de Estudios con Acervo de Matemáticas", "nivel": "Primer Piso", "piso": 1}, {"id": 631, "nombre": "Aula de Cómputo 5", "nivel": "Segundo Piso", "piso": 2}, {"id": 632, "nombre": "Aula de Cómputo 6", "nivel": "Segundo Piso", "piso": 2}, {"id": 633, "nombre": "Aula de Cómputo 8", "nivel": "Segundo Piso", "piso": 2}, {"id": 637, "nombre": "Estancia de Bibliotecarios II", "nivel": "Segundo Piso", "piso": 2}, {"id": 640, "nombre": "Fondo Reservado", "nivel": "Segundo Piso", "piso": 2}, {"id": 629, "nombre": "Hemeroteca", "nivel": "Segundo Piso", "piso": 2}, {"id": 636, "nombre": "Jefatura de Biblioteca", "nivel": "Segundo Piso", "piso": 2}, {"id": 639, "nombre": "Módulo de Préstamo", "nivel": "Segundo Piso", "piso": 2}, {"id": 638, "nombre": "Sala de Estudios con Acervo de Física", "nivel": "Segundo Piso", "piso": 2}, {"id": 630, "nombre": "Secretaría de Comunicación y Difusión Cultural-Científica", "nivel": "Segundo Piso", "piso": 2}, {"id": 635, "nombre": "Servicio de Referencia Digital", "nivel": "Segundo Piso", "piso": 2}, {"id": 634, "nombre": "Taller de Cómputo Amoxcalli", "nivel": "Segundo Piso", "piso": 2}, {"id": 643, "nombre": "Estancia de Bibliotecarios III", "nivel": "Tercer Piso", "piso": 3}, {"id": 641, "nombre": "Megasala de Cómputo", "nivel": "Tercer Piso", "piso": 3}, {"id": 644, "nombre": "Sala de Estudios con Acervo de Biología", "nivel": "Tercer Piso", "piso": 3}, {"id": 642, "nombre": "Taller de Matemáticas", "nivel": "Tercer Piso", "piso": 3}], "prefijo": "AM", "mapa": 12}]</script>
 <script>
 const CATALOGO = JSON.parse(document.getElementById("catalogo").textContent);
-const LLAVE = "recorridos-salones-fc";
+const LLAVE = "recorridos-fc-v3";
+const LLAVE_V2 = "recorridos-salones-fc";
+const KA = 0.424628, KB = -0.017169, CE = -370.252, CN = 113.448, KQ = KA * KA + KB * KB, M_PX = Math.sqrt(KQ);
+const RADIO_PX = 15 / M_PX;
+const LAT0 = 19.3244628, LON0 = -99.1787148, M_GRADO = Math.PI / 180 * 6371008.8, COS0 = Math.cos(LAT0 * Math.PI / 180);
+const GPS_ANCLA_M = 8, GPS_ARISTA_M = 10;
+const PISOS = [-1, 0, 1, 2, 3, 4];
+const NOMBRE_PISO = { "-1": "Sótano", "0": "PB", "1": "Piso 1", "2": "Piso 2", "3": "Piso 3", "4": "Piso 4" };
+const COLOR_PISO = { "-1": "#8c564b", "0": "#1f6fd1", "1": "#d62728", "2": "#2ca02c", "3": "#9467bd", "4": "#e67e00" };
+const COLOR_TIPO = { V_S: "#00b0f0", V_PCI: "#a6a6a6", V_PCE: "#7f6bb3", V_EYS: "#e03c31", V_ESC: "#ffc000", V_ELC: "#00b050", V_RAM: "#e377c2" };
+const NOMBRE_TIPO = { V_S: "Salón o espacio", V_PCI: "Punto de pasillo interior", V_PCE: "Pasillo o andador externo", V_EYS: "Entrada o salida", V_ESC: "Escalera", V_ELC: "Elevador", V_RAM: "Rampa" };
+const TRAMOS = {
+  pasillo: { nombre: "Pasillo", arista: "pasillo", nodo: "V_PCI" },
+  exterior: { nombre: "Andador", arista: "pasillo_exterior", nodo: "V_PCE" },
+  escalera: { nombre: "Escalera", arista: "escalera", nodo: "V_PCE", vertical: true, medio: "V_ESC" },
+  rampa: { nombre: "Rampa", arista: "rampa", nodo: "V_PCE", vertical: true, medio: "V_RAM" },
+  elevador: { nombre: "Elevador", arista: "elevador_vertical", nodo: "V_ELC", vertical: true },
+};
 const $ = s => document.querySelector(s);
-const estado = {
-  marcas: [], donde: "puerta", db: null,
-  activo: false, recorrido: null, x: 0, y: 0, pasos: 0, metros: 0, ruta: [[0, 0]],
-  rumbo: null, base: 9.8, rapida: 9.8, armado: true, ultimoPaso: 0, lecturas: 0,
-  calibrando: null, candado: null,
+const esc = t => String(t ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const r1 = v => Math.round(v * 10) / 10;
+const r2 = v => Math.round(v * 100) / 100;
+const fecha = () => new Date().toLocaleDateString("sv-SE");
+
+function pxAMetros(px, py) {
+  return [KA * px + KB * py + CE, KB * px - KA * py + CN];
+}
+function metrosAPx(E, N) {
+  const e = E - CE, n = N - CN;
+  return [(KA * e + KB * n) / KQ, (KB * e - KA * n) / KQ];
+}
+function avancePx(dE, dN) {
+  return [(KA * dE + KB * dN) / KQ, (KB * dE - KA * dN) / KQ];
+}
+function gpsAMetros(lat, lon) {
+  return [(lon - LON0) * M_GRADO * COS0, (lat - LAT0) * M_GRADO];
+}
+function metrosAGps(E, N) {
+  return [LAT0 + N / M_GRADO, LON0 + E / (M_GRADO * COS0)];
+}
+function mediana(v) {
+  const s = [...v].sort((a, b) => a - b), k = s.length >> 1;
+  return s.length % 2 ? s[k] : (s[k - 1] + s[k]) / 2;
+}
+function medidaGps(t) {
+  let desde = 0;
+  G.rastro.forEach((r, i) => { if (r.evento === "descarte" && r.tramo_id === t.id) desde = i; });
+  const puntos = G.rastro.slice(desde).filter(r => r.evento === "gps" && r.tramo_id === t.id && r.recorrido === S.recorrido && r.precision_m <= GPS_ARISTA_M);
+  if (puntos.length < 2) return { gps_m: "", gps_precision_m: "" };
+  const dist = (a, b) => { const [e0, n0] = gpsAMetros(a.lat, a.lon), [e1, n1] = gpsAMetros(b.lat, b.lon); return Math.hypot(e1 - e0, n1 - n0); };
+  let total = 0, previo = puntos[0];
+  for (const p of puntos.slice(1)) {
+    const d = dist(previo, p);
+    if (d >= 2 * Math.max(p.precision_m, previo.precision_m)) { total += d; previo = p; }
+  }
+  if (previo !== puntos.at(-1)) total += dist(previo, puntos.at(-1));
+  return { gps_m: r1(total).toFixed(1), gps_precision_m: r1(mediana(puntos.map(p => p.precision_m))).toFixed(1) };
+}
+
+let G, S;
+const R = {
+  activo: false, rumbo: null, lecturas: 0, base: 9.8, rapida: 9.8, armado: true, ultimoPaso: 0,
+  candado: null, modo: null, pila: [], calibrando: null, vista: { x: 0, y: 0, w: 1010 }, dibujo: false, guardado: null,
+  gps: null, fix: null,
 };
 
-function leer() {
-  try { return JSON.parse(localStorage.getItem(LLAVE) || "[]"); } catch (e) { return []; }
+function grafoVacio() {
+  return {
+    version: 3, nodos: [], aristas: [], rastro: [],
+    ajustes: { zancada: 0.7, umbral: 1.2, declinacion: 4.5 },
+    s: { recorrido: null, piso: 0, x: null, y: null, tramo: null, ancla: -1, pasos: 0, metros: 0, nTramo: 0, edificio: CATALOGO[0].id, filtro: "todos" },
+  };
 }
-function guardar() {
-  try { localStorage.setItem(LLAVE, JSON.stringify(estado.marcas)); } catch (e) {}
+function usar(g) { G = g; S = g.s; }
+
+function guardarYa() {
+  clearTimeout(R.guardado);
+  R.guardado = null;
+  try { localStorage.setItem(LLAVE, JSON.stringify(G)); return true; } catch (e) {
+    aviso("No se pudo guardar en el teléfono (memoria llena). Descarga el respaldo JSON y los CSV ya.");
+    return false;
+  }
 }
+function guardar() { if (!R.guardado) R.guardado = setTimeout(guardarYa, 1500); }
 
-const edificioActual = () => CATALOGO.find(e => String(e.id) === $("#edificio").value) || CATALOGO[0];
-const marcado = id => estado.marcas.some(m => m.lugar_id === id);
-const numero = (sel, def) => { const v = parseFloat($(sel).value); return Number.isFinite(v) && v > 0 ? v : def; };
-const zancada = () => numero("#zancada", 0.7);
-const umbral = () => numero("#umbral", 1.2);
-const delRecorrido = () => estado.marcas.filter(m => m.recorrido === estado.recorrido);
-
-function pintarEdificios() {
-  $("#edificio").innerHTML = CATALOGO
-    .map(e => `<option value="${e.id}">${e.nombre} (${e.lugares.length})</option>`).join("");
+function edificioDe(id) { return CATALOGO.find(e => String(e.id) === String(id)) || CATALOGO[0]; }
+function lugarIdDe(l) { return typeof l.id === "number" ? l.id : ""; }
+function idLugar(e, l) {
+  if (typeof l.id === "string") return l.id;
+  return /^[A-Z]{1,2}\d{3}$/.test(l.nombre) ? l.nombre : `${e.prefijo}${l.id}`;
 }
-
-function pintarSalones() {
-  const e = edificioActual();
-  const previo = $("#salon").value;
-  $("#salon").innerHTML = e.lugares
-    .map(l => `<option value="${l.id}">${marcado(l.id) ? "✓ " : ""}${l.nombre} · ${l.nivel}</option>`).join("");
-  if (e.lugares.some(l => String(l.id) === previo)) $("#salon").value = previo;
-  const hechos = e.lugares.filter(l => marcado(l.id)).length;
-  $("#barra").style.width = `${100 * hechos / e.lugares.length}%`;
-  $("#avance-texto").textContent = `${hechos} de ${e.lugares.length} marcados`;
+function codigoPiso(p) { return String(p).split(/(?<=\d)-/).map(v => v === "-1" ? "S" : v).join(""); }
+function pisoTexto(a, b) { return a === b ? String(a) : `${Math.min(a, b)}-${Math.max(a, b)}`; }
+function pisoIncluye(p, f) {
+  const m = String(p).match(/^(-?\d+)-(-?\d+)$/);
+  return m ? +f >= +m[1] && +f <= +m[2] : String(p) === String(f);
 }
-
-function pintarMarcas() {
-  const lista = [...estado.marcas].reverse().slice(0, 40);
-  $("#marcas").innerHTML = lista.length ? lista.map(m => `
-    <li>
-      <span><b>${m.lugar}</b><br><small>${m.edificio} · ${m.nivel} · ${m.donde}</small></span>
-      <small>+${m.metros_desde_anterior.toFixed(1)} m${m.subida ? "" : " ·↑"}</small>
-      <button type="button" class="borrar" data-id="${m.id}" aria-label="Borrar marca de ${m.lugar}">×</button>
-    </li>`).join("") : '<li><span class="nota">Todavía no hay marcas.</span></li>';
-  $("#marcas").querySelectorAll("button[data-id]").forEach(b => b.addEventListener("click", () => borrar(b.dataset.id)));
-  const sinSubir = estado.marcas.filter(m => !m.subida).length;
-  $("#guardado").textContent = `${estado.marcas.length} marca${estado.marcas.length === 1 ? "" : "s"}`;
-  $("#pendientes").hidden = sinSubir === 0 || !window.claude;
-  $("#pendientes").textContent = `${sinSubir} marca${sinSubir === 1 ? "" : "s"} sin subir. Están guardadas en el teléfono; toca Sincronizar cuando tengas señal.`;
-  const total = CATALOGO.reduce((s, e) => s + e.lugares.length, 0);
-  const lugares = new Set(estado.marcas.map(m => m.lugar_id)).size;
-  $("#resumen").textContent = `${lugares} de ${total} lugares del catálogo`;
+function nodo(id) { return G.nodos.find(n => n.id === id); }
+function unico(base) {
+  for (let k = 1; ; k++) {
+    const id = `${base}${String(k).padStart(2, "0")}`;
+    if (!nodo(id)) return id;
+  }
 }
+function baseId(tipo, piso, pref) {
+  const c = codigoPiso(piso);
+  return { V_PCI: `PI${pref}${c}_`, V_PCE: `PCE${c}_`, V_EYS: `EYS${pref}_`, V_ELC: `ELC${pref}${c}_`, V_ESC: `ESC${pref}${c}_`, V_RAM: `RAM${pref}${c}_` }[tipo] || `N${c}_`;
+}
+function zancada() { return G.ajustes.zancada; }
 
-function pintarRuta() {
-  const puntos = estado.ruta;
-  const marcas = delRecorrido();
-  const xs = puntos.map(p => p[0]).concat(marcas.map(m => m.x));
-  const ys = puntos.map(p => p[1]).concat(marcas.map(m => m.y));
-  const minx = Math.min(...xs), maxx = Math.max(...xs), miny = Math.min(...ys), maxy = Math.max(...ys);
-  const lado = Math.max(maxx - minx, maxy - miny, 10) * 1.15;
-  const cx = (minx + maxx) / 2, cy = (miny + maxy) / 2;
-  const svg = $("#ruta");
-  svg.setAttribute("viewBox", `${cx - lado / 2} ${-cy - lado / 2} ${lado} ${lado}`);
-  const r = lado / 90;
-  const letra = lado / 28;
-  svg.innerHTML = `<polyline points="${puntos.map(p => `${p[0].toFixed(2)},${(-p[1]).toFixed(2)}`).join(" ")}"/>`
-    + marcas.map(m => `<circle class="salon" cx="${m.x}" cy="${-m.y}" r="${r * 1.6}"/>`
-      + `<text x="${m.x + r * 2}" y="${-m.y - r * 2}" style="font-size:${letra}px">${m.lugar}</text>`).join("")
-    + `<circle class="yo" cx="${estado.x}" cy="${-estado.y}" r="${r * 2}"/>`;
-  $("#pasos").textContent = `${estado.pasos} pasos · ${estado.metros.toFixed(1)} m`;
+function fila(evento, extra = {}) {
+  const t = S.tramo;
+  const verd = R.rumbo === null ? null : (R.rumbo + G.ajustes.declinacion + 360) % 360;
+  const x = S.x === null ? null : r1(S.x), y = S.y === null ? null : r1(S.y);
+  G.rastro.push({
+    recorrido: S.recorrido, t_iso: new Date().toISOString(), evento, piso: S.piso,
+    tramo_id: t ? t.id : "", tipo_tramo: t ? t.tipo : "", pasos: S.pasos, metros: r2(S.metros),
+    rumbo_mag: R.rumbo === null ? null : r1(R.rumbo), rumbo_verdadero: verd === null ? null : r1(verd),
+    x_crudo: x, y_crudo: y, x, y, nodo_id: "", ...extra,
+  });
+  return G.rastro.length - 1;
 }
 
-function borrar(id) {
-  estado.marcas = estado.marcas.filter(m => m.id !== id);
-  guardar();
-  pintarSalones();
-  pintarMarcas();
-  pintarRuta();
-  if (estado.db) estado.db.doc(`marcas/${id}`).delete().catch(() => {});
+function nuevoNodo({ tipo, piso, label, lugar_id = "", notas = "", pref, x = S.x, y = S.y, id }) {
+  const n = {
+    id: id || unico(baseId(tipo, piso, pref)), label: "", tipo, piso: String(piso), lugar_id,
+    x: x === null ? null : r1(x), y: y === null ? null : r1(y), notas, recorrido: S.recorrido, rastro: 0,
+  };
+  n.label = label || n.id;
+  G.nodos.push(n);
+  n.rastro = fila("nodo", { nodo_id: n.id });
+  return n;
+}
+
+function notaPodometro(extra) {
+  return [`PODÓMETRO ${fecha()}`, `zancada ${zancada().toFixed(2)} m`, ...extra].join("; ");
+}
+function arista(origen, destino, tipo_arista, longitud_m, extra = {}) {
+  const a = { origen, destino, tipo_arista, longitud_m, desnivel_m: "0", n_escalones: "0", notas: "", tramo_id: S.tramo ? S.tramo.id : "", ...extra };
+  G.aristas.push(a);
+  return a;
+}
+function tipoArista(tipoTramo, a, b) {
+  const base = TRAMOS[tipoTramo].arista;
+  if (base !== "pasillo") return base;
+  const tipos = [nodo(a).tipo, nodo(b).tipo];
+  if (tipos.includes("V_EYS")) return "acceso_edificio";
+  if (tipos.includes("V_ELC")) return "elevador_acceso";
+  return base;
+}
+
+function abrirTramo(tipo, inicio) {
+  S.nTramo += 1;
+  S.tramo = { id: `T${S.nTramo}`, tipo, inicio, pasos0: S.pasos, metros0: S.metros, t0: Date.now(), piso0: S.piso };
+  fila("inicio_tramo", { nodo_id: inicio });
+}
+function medidaTramo() {
+  const t = S.tramo;
+  return { pasos: S.pasos - t.pasos0, metros: S.metros - t.metros0, segundos: Math.round((Date.now() - t.t0) / 1000) };
+}
+function cerrarTramo(fin, siguiente) {
+  const t = S.tramo;
+  const m = medidaTramo();
+  if (t.inicio !== fin.id) {
+    arista(t.inicio, fin.id, tipoArista(t.tipo, t.inicio, fin.id), r1(m.metros).toFixed(1), {
+      notas: notaPodometro([`${m.pasos} pasos`, `${m.segundos} s`]),
+      ...(t.tipo === "exterior" ? medidaGps(t) : {}),
+    });
+  }
+  fila("fin_tramo", { nodo_id: fin.id });
+  abrirTramo(siguiente, fin.id);
+}
+
+function repartir(total, partes) {
+  const base = Math.floor(total / partes), resto = total - base * partes;
+  return Array.from({ length: partes }, (_, i) => base + (i < resto ? 1 : 0));
+}
+function cerrarVertical(r, siguiente) {
+  const t = S.tramo;
+  const tr = TRAMOS[t.tipo];
+  const m = medidaTramo();
+  const a = t.piso0, b = r.llegada;
+  const k = Math.abs(b - a), dir = Math.sign(b - a), n = Math.max(k, 1);
+  const inicio = nodo(t.inicio);
+  const pref = edificioDe(r.edificio || S.edificio).prefijo;
+  let fin = r.reusar ? nodo(r.reusar) : null;
+  S.piso = b;
+  if (fin && fin.x !== null) reanclar(fin.x, fin.y, fin.id);
+  const x0 = inicio.x ?? S.x, y0 = inicio.y ?? S.y;
+  const punto = f => [x0 + (S.x - x0) * f, y0 + (S.y - y0) * f];
+  if (t.tipo === "elevador") {
+    let previo = inicio;
+    for (let i = 1; i <= k; i++) {
+      const f = a + dir * i;
+      let sig = i === k ? fin : null;
+      if (!sig) sig = (cercanos(S.x, S.y, f, RADIO_PX).find(o => o.n.tipo === "V_ELC") || {}).n;
+      if (!sig) sig = nuevoNodo({ tipo: "V_ELC", piso: f, pref, label: i === k ? r.label : "", notas: i === k ? r.notas : "" });
+      arista(previo.id, sig.id, "elevador_vertical", "0", { desnivel_m: "", notas: notaPodometro([`elevador ${a} → ${b}`]) });
+      previo = sig;
+    }
+    fin = previo;
+    if (k === 0) aviso("El elevador no cambió de piso; no se creó arista.");
+  } else {
+    const escalones = repartir(r.escalones || 0, n);
+    const detalle = t.tipo === "escalera" ? [`${r.escalones || 0} escalones`, `${r.descansos || 0} descansos`] : [];
+    const desnivel = Number.isFinite(r.desnivel) ? r2(r.desnivel / (2 * n)).toFixed(2) : "";
+    const largo = r1(m.metros / (2 * n)).toFixed(1);
+    let previo = inicio;
+    for (let i = 0; i < n; i++) {
+      const fa = a + dir * i, fb = k ? fa + dir : a;
+      const [xm, ym] = punto((i + 0.5) / n);
+      const medio = nuevoNodo({ tipo: tr.medio, piso: pisoTexto(fa, fb), pref, x: xm, y: ym, notas: detalle.join("; ") });
+      let sig;
+      if (i === n - 1) {
+        sig = fin || nuevoNodo({ tipo: r.tipo, piso: b, pref, label: r.label, notas: r.notas });
+      } else {
+        const [xl, yl] = punto((i + 1) / n);
+        sig = nuevoNodo({ tipo: "V_PCE", piso: fb, pref, x: xl, y: yl, notas: "descanso entre tramos de escalera" });
+      }
+      const [s1, s2] = [Math.ceil(escalones[i] / 2), Math.floor(escalones[i] / 2)];
+      const nota = notaPodometro([...detalle, `longitud repartida en ${2 * n} partes iguales`]);
+      const comun = { desnivel_m: desnivel, notas: nota };
+      arista(previo.id, medio.id, tr.arista, largo, { ...comun, n_escalones: t.tipo === "escalera" ? String(s1) : "0" });
+      arista(medio.id, sig.id, tr.arista, largo, { ...comun, n_escalones: t.tipo === "escalera" ? String(s2) : "0" });
+      previo = sig;
+    }
+    fin = previo;
+  }
+  fila("fin_tramo", { nodo_id: fin.id });
+  abrirTramo(siguiente, fin.id);
+  return fin;
+}
+
+function transformar(A, C, P) {
+  const dx = C[0] - A[0], dy = C[1] - A[1];
+  const d2 = dx * dx + dy * dy;
+  if (d2 < (2 / M_PX) ** 2) {
+    const sx = P[0] - C[0], sy = P[1] - C[1];
+    return ([x, y]) => [x + sx, y + sy];
+  }
+  const px = P[0] - A[0], py = P[1] - A[1];
+  const re = (px * dx + py * dy) / d2, im = (py * dx - px * dy) / d2;
+  return ([x, y]) => {
+    const u = x - A[0], v = y - A[1];
+    return [A[0] + re * u - im * v, A[1] + im * u + re * v];
+  };
+}
+function reanclar(px, py, excluir = "") {
+  const C = [S.x, S.y], P = [px, py];
+  if (S.ancla >= 0 && S.x !== null) {
+    const a = G.rastro[S.ancla];
+    const f = transformar([a.x, a.y], C, P);
+    for (let i = S.ancla + 1; i < G.rastro.length; i++) {
+      const row = G.rastro[i];
+      if (row.x === null || row.recorrido !== S.recorrido) continue;
+      [row.x, row.y] = f([row.x, row.y]).map(r1);
+    }
+    for (const n of G.nodos) {
+      if (n.rastro > S.ancla && n.recorrido === S.recorrido && n.id !== excluir && n.x !== null) [n.x, n.y] = f([n.x, n.y]).map(r1);
+    }
+  }
+  S.x = px; S.y = py;
+  S.ancla = fila("ancla", { x_crudo: C[0] === null ? r1(px) : r1(C[0]), y_crudo: C[1] === null ? r1(py) : r1(C[1]), nodo_id: excluir });
 }
 
 function paso() {
-  const h = (estado.rumbo ?? 0) * Math.PI / 180;
+  if (!S.tramo || S.tramo.tipo === "elevador" || S.x === null) return;
   const l = zancada();
-  estado.x += l * Math.sin(h);
-  estado.y += l * Math.cos(h);
-  estado.pasos += 1;
-  estado.metros += l;
-  estado.ruta.push([estado.x, estado.y]);
-  pintarRuta();
+  if (R.rumbo !== null) {
+    const h = (R.rumbo + G.ajustes.declinacion) * Math.PI / 180;
+    const [dx, dy] = avancePx(l * Math.sin(h), l * Math.cos(h));
+    S.x += dx; S.y += dy;
+  }
+  S.pasos += 1;
+  S.metros += l;
+  fila("paso");
+  guardar();
+  pedirDibujo();
 }
 
 function alMoverse(ev) {
   const a = ev.accelerationIncludingGravity;
   if (!a || a.x === null) return;
-  estado.lecturas += 1;
+  R.lecturas += 1;
   const g = Math.hypot(a.x, a.y, a.z);
-  estado.base = 0.98 * estado.base + 0.02 * g;
-  estado.rapida = 0.7 * estado.rapida + 0.3 * g;
-  const d = estado.rapida - estado.base;
+  R.base = 0.98 * R.base + 0.02 * g;
+  R.rapida = 0.7 * R.rapida + 0.3 * g;
+  const d = R.rapida - R.base;
   const t = ev.timeStamp;
-  if (estado.armado && d > umbral() && t - estado.ultimoPaso > 300) {
-    estado.armado = false;
-    estado.ultimoPaso = t;
+  if (R.armado && d > G.ajustes.umbral && t - R.ultimoPaso > 300) {
+    R.armado = false;
+    R.ultimoPaso = t;
     paso();
   } else if (d < 0) {
-    estado.armado = true;
+    R.armado = true;
   }
 }
-
 function alGirar(ev) {
   let h = null;
   if (typeof ev.webkitCompassHeading === "number") h = ev.webkitCompassHeading;
   else if (ev.absolute && ev.alpha !== null) h = (360 - ev.alpha) % 360;
   if (h === null) return;
-  estado.rumbo = h;
-  $("#rumbo").textContent = `rumbo ${Math.round(h)}°`;
+  const cambio = R.rumbo === null || Math.abs(((h - R.rumbo + 540) % 360) - 180) >= 2;
+  R.rumbo = h;
+  if (cambio) pedirDibujo();
 }
-
 async function pedirPermisos() {
   for (const Clase of [window.DeviceMotionEvent, window.DeviceOrientationEvent]) {
     if (Clase && typeof Clase.requestPermission === "function") {
@@ -300,180 +557,623 @@ async function pedirPermisos() {
     }
   }
 }
-
 async function mantenerPantalla() {
-  try { estado.candado = await navigator.wakeLock.request("screen"); } catch (e) {}
+  try { R.candado = await navigator.wakeLock.request("screen"); } catch (e) {}
 }
 
+function gpsSegunTramo() {
+  const quiere = R.activo && !!S.tramo && S.tramo.tipo === "exterior" && "geolocation" in navigator;
+  if (quiere && R.gps === null) {
+    R.gps = navigator.geolocation.watchPosition(alGps, alErrorGps, { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 });
+  } else if (!quiere && R.gps !== null) {
+    navigator.geolocation.clearWatch(R.gps);
+    R.gps = null;
+    R.fix = null;
+  }
+}
+function alGps(p) {
+  if (!S.tramo || S.tramo.tipo !== "exterior") return;
+  const { latitude: lat, longitude: lon, accuracy } = p.coords;
+  const [x, y] = metrosAPx(...gpsAMetros(lat, lon));
+  R.fix = { x, y, precision: accuracy, t: Date.now() };
+  fila("gps", { lat: Math.round(lat * 1e7) / 1e7, lon: Math.round(lon * 1e7) / 1e7, precision_m: r1(accuracy), x_crudo: null, y_crudo: null, x: null, y: null });
+  guardar();
+  pedirDibujo();
+}
+function alErrorGps(e) {
+  if (e.code === 1) aviso("El teléfono no dio permiso de ubicación: el andador se mide solo con pasos.");
+  pedirDibujo();
+}
+function gpsUsable() {
+  return !!R.fix && R.fix.precision <= GPS_ANCLA_M && Date.now() - R.fix.t < 15000;
+}
+function anclarConGps() {
+  if (!gpsUsable()) { aviso(`El GPS todavía no es confiable (necesita ±${GPS_ANCLA_M} m o menos).`); return; }
+  recordar();
+  const p = r1(R.fix.precision);
+  reanclar(R.fix.x, R.fix.y);
+  aviso(`Posición corregida con el GPS (±${p} m). Los metros medidos no cambian.`);
+  hecho();
+}
+function aviso(texto) { $("#aviso").textContent = texto; }
+function ponerModo(modo, texto) {
+  R.modo = modo;
+  $("#modo").hidden = !modo;
+  $("#modo").textContent = texto || "";
+  $("#b-aqui").setAttribute("aria-pressed", String(modo === "ancla"));
+}
+function recordar() {
+  R.pila.push(JSON.stringify(G));
+  if (R.pila.length > 30) R.pila.shift();
+}
+function hecho() { guardarYa(); gpsSegunTramo(); pintarTodo(); }
+
 async function iniciar() {
-  if (estado.activo) {
-    estado.activo = false;
+  if (R.activo) {
+    R.activo = false;
     window.removeEventListener("devicemotion", alMoverse);
     window.removeEventListener("deviceorientationabsolute", alGirar);
     window.removeEventListener("deviceorientation", alGirar);
-    try { estado.candado && estado.candado.release(); } catch (e) {}
-    $("#iniciar").textContent = "Reanudar recorrido";
-    $("#sensores").className = "chip";
-    $("#sensores").textContent = "en pausa";
-    $("#marcar-pie").textContent = "recorrido en pausa";
+    try { R.candado && R.candado.release(); } catch (e) {}
+    $("#b-iniciar").textContent = "Reanudar";
+    gpsSegunTramo();
+    pintarEstado();
     return;
   }
   try { await pedirPermisos(); } catch (e) {
-    $("#ultima").textContent = "El teléfono no dio permiso para los sensores de movimiento. Actívalo en los ajustes del navegador y vuelve a intentar.";
+    aviso("El teléfono no dio permiso para los sensores de movimiento. Actívalo en los ajustes del navegador y vuelve a intentar.");
     return;
   }
-  if (!estado.recorrido) estado.recorrido = `r${Date.now()}`;
-  estado.activo = true;
-  estado.lecturas = 0;
+  R.activo = true;
+  R.lecturas = 0;
   window.addEventListener("devicemotion", alMoverse);
   window.addEventListener("ondeviceorientationabsolute" in window ? "deviceorientationabsolute" : "deviceorientation", alGirar);
   mantenerPantalla();
-  $("#iniciar").textContent = "Pausar recorrido";
-  $("#sensores").className = "chip regular";
-  $("#sensores").textContent = "esperando sensores…";
-  $("#marcar-pie").textContent = "toca al llegar al salón";
+  $("#b-iniciar").textContent = "Pausar";
+  if (!S.tramo) ponerModo("inicio", "Toca en el mapa dónde estás parado");
+  gpsSegunTramo();
+  pintarEstado();
   setTimeout(() => {
-    if (!estado.activo) return;
-    const ok = estado.lecturas > 0;
-    $("#sensores").className = `chip ${ok ? "bien" : "mal"}`;
-    $("#sensores").textContent = ok ? "sensores activos" : "sin acelerómetro";
-    if (!ok) $("#ultima").textContent = "Este navegador no deja leer el acelerómetro desde la página. Prueba abrir el enlace directo en Chrome (Android) o Safari (iPhone).";
-    if (ok && estado.rumbo === null) $("#rumbo").textContent = "sin brújula";
+    if (!R.activo) return;
+    if (!R.lecturas) aviso("Este navegador no deja leer el acelerómetro. Abre el enlace directo en Chrome (Android) o Safari (iPhone).");
+    else if (R.rumbo === null) aviso("No hay brújula: se cuentan los pasos y los metros, pero la posición no avanza. Usa Estoy aquí seguido.");
+    pintarEstado();
   }, 2500);
 }
 
-function nuevo() {
-  Object.assign(estado, { recorrido: `r${Date.now()}`, x: 0, y: 0, pasos: 0, metros: 0, ruta: [[0, 0]] });
-  pintarRuta();
-  $("#ultima").textContent = "Recorrido nuevo: el punto donde estás ahora es el origen (0, 0).";
-}
-
-function calibrar() {
-  if (!estado.activo) { $("#ultima").textContent = "Inicia el recorrido antes de calibrar."; return; }
-  if (estado.calibrando === null) {
-    estado.calibrando = estado.pasos;
-    $("#calibrar").textContent = "Terminar";
-    $("#ultima").textContent = `Camina los ${numero("#conocida", 10)} m y toca Terminar.`;
-    return;
-  }
-  const n = estado.pasos - estado.calibrando;
-  estado.calibrando = null;
-  $("#calibrar").textContent = "Calibrar";
-  if (n < 3) { $("#ultima").textContent = "Contó muy pocos pasos; baja la sensibilidad y repite."; return; }
-  const l = numero("#conocida", 10) / n;
-  $("#zancada").value = l.toFixed(2);
-  try { localStorage.setItem(`${LLAVE}-zancada`, l.toFixed(2)); } catch (e) {}
-  $("#ultima").textContent = `${n} pasos en ${numero("#conocida", 10)} m: tu paso mide ${l.toFixed(2)} m.`;
-}
-
-async function subir(marca) {
-  if (!estado.db) return false;
-  try {
-    const { id, subida, ...cuerpo } = marca;
-    await estado.db.doc(`marcas/${id}`).set(cuerpo);
-    return true;
-  } catch (e) {
-    return false;
+async function alTocarMapa(px, py) {
+  if (R.modo === "ancla") {
+    ponerModo(null);
+    recordar();
+    reanclar(px, py);
+    aviso("Posición corregida. El tramo desde el ancla anterior se ajustó al mapa; los metros medidos no cambian.");
+    hecho();
+  } else if (R.modo === "inicio") {
+    ponerModo(null);
+    const r = await pedirNodo({ titulo: "¿Dónde empiezas?", tipo: "V_EYS", punto: [px, py], piso: S.piso });
+    if (!r) { ponerModo("inicio", "Toca en el mapa dónde estás parado"); return; }
+    recordar();
+    S.recorrido = `r${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, "")}`;
+    S.x = null; S.y = null; S.ancla = -1; S.tramo = null;
+    const n = r.reusar ? nodo(r.reusar) : null;
+    const [x, y] = n && n.x !== null ? [n.x, n.y] : [px, py];
+    reanclar(x, y, n ? n.id : "");
+    const inicio = n || nuevoNodo({ tipo: r.tipo, piso: S.piso, pref: edificioDe(r.edificio).prefijo, label: r.label, notas: r.notas });
+    abrirTramo("pasillo", inicio.id);
+    aviso(`Recorrido iniciado en ${inicio.label}. Camina con el teléfono al frente, como si leyeras.`);
+    hecho();
+    centrar();
   }
 }
 
-const pedirDb = () => (window.claude && window.claude.use ? window.claude.use("db") : Promise.resolve(null));
-
-async function sincronizar() {
-  if (!estado.db) {
-    estado.db = await pedirDb();
-    if (!estado.db) return;
+function requiereTramo(horizontal) {
+  if (!S.tramo) { aviso("Primero toca Iniciar y marca en el mapa dónde estás."); return false; }
+  if (horizontal && TRAMOS[S.tramo.tipo].vertical) { aviso(`Termina primero el tramo de ${TRAMOS[S.tramo.tipo].nombre.toLowerCase()} tocando Pasillo.`); return false; }
+  return true;
+}
+function crearDesdeDialogo(r, piso) {
+  if (r.reusar) {
+    const n = nodo(r.reusar);
+    if (n.x !== null) reanclar(n.x, n.y, n.id);
+    return n;
   }
-  for (const m of estado.marcas.filter(x => !x.subida)) {
-    m.subida = await subir(m);
-  }
-  guardar();
-  pintarMarcas();
+  return nuevoNodo({ tipo: r.tipo, piso, pref: edificioDe(r.edificio).prefijo, label: r.label, notas: r.notas });
 }
 
-async function marcar() {
-  if (!estado.activo) { $("#ultima").textContent = "Primero toca Iniciar recorrido."; return; }
-  const e = edificioActual();
-  const l = e.lugares.find(x => String(x.id) === $("#salon").value);
+async function cambiarTramo(tipo) {
+  if (!requiereTramo(false) || S.tramo.tipo === tipo) return;
+  const actual = TRAMOS[S.tramo.tipo];
+  if (actual.vertical) {
+    const r = await pedirNodo({ titulo: `Fin de ${actual.nombre.toLowerCase()}`, tipo: actual.nodo, vertical: S.tramo.tipo, punto: [S.x, S.y], piso: S.piso });
+    if (!r) return;
+    recordar();
+    const fin = cerrarVertical(r, tipo);
+    aviso(`${actual.nombre} cerrada en ${fin.label}. Estás en ${NOMBRE_PISO[S.piso]}.`);
+  } else {
+    const r = await pedirNodo({ titulo: `Empieza ${TRAMOS[tipo].nombre.toLowerCase()}: nodo aquí`, tipo: TRAMOS[tipo].vertical ? TRAMOS[tipo].nodo : "V_PCI", punto: [S.x, S.y], piso: S.piso });
+    if (!r) return;
+    recordar();
+    const m = medidaTramo();
+    const fin = crearDesdeDialogo(r, S.piso);
+    cerrarTramo(fin, tipo);
+    aviso(`${actual.nombre}: ${r1(m.metros).toFixed(1)} m hasta ${fin.label}. Ahora: ${TRAMOS[tipo].nombre.toLowerCase()}.`);
+  }
+  hecho();
+}
+
+async function puntoAqui() {
+  if (!requiereTramo(true)) return;
+  const r = await pedirNodo({ titulo: "Punto aquí", tipo: TRAMOS[S.tramo.tipo].nodo, punto: [S.x, S.y], piso: S.piso });
+  if (!r) return;
+  recordar();
+  const m = medidaTramo();
+  const n = crearDesdeDialogo(r, S.piso);
+  cerrarTramo(n, S.tramo.tipo);
+  aviso(`${n.label}: ${r1(m.metros).toFixed(1)} m (${m.pasos} pasos) desde el nodo anterior.`);
+  hecho();
+}
+
+function marcarLugar() {
+  if (!requiereTramo(true)) return;
+  const e = edificioDe($("#edificio").value);
+  const l = e.lugares.find(x => String(x.id) === $("#lugar").value);
   if (!l) return;
-  const previa = delRecorrido().at(-1);
-  const ts = Date.now();
-  const marca = {
-    id: `${e.id}_${l.id}_${ts}`, recorrido: estado.recorrido,
-    edificio: e.nombre, edificio_id: e.id, lugar: l.nombre, lugar_id: l.id, nivel: l.nivel, donde: estado.donde,
-    x: +estado.x.toFixed(2), y: +estado.y.toFixed(2), pasos: estado.pasos, metros: +estado.metros.toFixed(2),
-    desde: previa ? previa.lugar : "inicio",
-    pasos_desde_anterior: estado.pasos - (previa ? previa.pasos : 0),
-    metros_desde_anterior: +(estado.metros - (previa ? previa.metros : 0)).toFixed(2),
-    zancada_m: zancada(), ts: new Date(ts).toISOString(), subida: false,
-  };
-  marca.subida = await subir(marca);
-  estado.marcas.push(marca);
-  guardar();
-  $("#ultima").textContent = `${l.nombre}: ${marca.metros_desde_anterior.toFixed(1)} m (${marca.pasos_desde_anterior} pasos) desde ${marca.desde}${marca.subida ? "" : ", guardado en el teléfono"}.`;
-  pintarSalones();
-  pintarMarcas();
-  pintarRuta();
+  recordar();
+  const via = $("#via-activa").checked ? nodo($("#via").value) : null;
+  let id = idLugar(e, l);
+  const previo = nodo(id);
+  if (previo && String(previo.lugar_id) !== String(lugarIdDe(l)) && previo.label !== l.nombre) id = unico(`${id}_`);
+  const lugar = nodo(id) || nuevoNodo({
+    id, tipo: "V_S", piso: S.piso, label: l.nombre, lugar_id: lugarIdDe(l),
+    notas: ["marca de podómetro", l.fuente ? `fuente ${l.fuente}` : ""].filter(Boolean).join("; "),
+  });
+  let texto;
+  if (via) {
+    arista(via.id, lugar.id, "acceso_interno", "", { notas: `se entra por ${via.label}` });
+    texto = `${l.nombre}: se entra por ${via.label}.`;
+  } else {
+    const m = medidaTramo();
+    let punto = nodo(S.tramo.inicio);
+    if (m.pasos > 0) {
+      punto = nuevoNodo({ tipo: TRAMOS[S.tramo.tipo].nodo, piso: S.piso, pref: e.prefijo, notas: `frente a ${l.nombre}` });
+      cerrarTramo(punto, S.tramo.tipo);
+    }
+    arista(punto.id, lugar.id, "acceso_salon", "", { notas: "la marca se toma en la puerta" });
+    texto = `${l.nombre}: ${r1(m.metros).toFixed(1)} m (${m.pasos} pasos) desde el nodo anterior.`;
+  }
+  if (l.piso !== S.piso) texto += ` Ojo: el catálogo lo pone en ${NOMBRE_PISO[l.piso]} y tú estás en ${NOMBRE_PISO[S.piso]}.`;
+  aviso(texto);
+  $("#via-activa").checked = false;
+  $("#via").hidden = true;
+  hecho();
   siguienteSinMarcar();
 }
 
-function siguienteSinMarcar() {
-  const e = edificioActual();
-  const pendiente = e.lugares.find(l => !marcado(l.id));
-  if (pendiente) $("#salon").value = pendiente.id;
+function descartar() {
+  if (!requiereTramo(false)) return;
+  recordar();
+  const t = S.tramo;
+  const n = nodo(t.inicio);
+  const m = medidaTramo();
+  if (n.x !== null) { S.x = n.x; S.y = n.y; }
+  t.pasos0 = S.pasos; t.metros0 = S.metros; t.t0 = Date.now();
+  S.ancla = fila("descarte", { nodo_id: n.id });
+  aviso(`Se descartaron ${m.pasos} pasos (${r1(m.metros).toFixed(1)} m). Regresa a ${n.label} y sigue desde ahí.`);
+  hecho();
 }
 
-function csv() {
-  const campos = ["recorrido", "edificio", "edificio_id", "lugar", "lugar_id", "nivel", "donde", "x", "y", "pasos", "metros",
-    "desde", "pasos_desde_anterior", "metros_desde_anterior", "zancada_m", "ts"];
-  const filas = estado.marcas.map(m => campos.map(c => `"${String(m[c]).replace(/"/g, '""')}"`).join(","));
-  return [campos.join(","), ...filas].join("\n");
+function deshacer() {
+  const s = R.pila.pop();
+  if (!s) { aviso("No hay nada que deshacer."); return; }
+  const previo = JSON.parse(s);
+  const nuevos = G.rastro.slice(previo.rastro.length).filter(r => r.evento === "paso");
+  if (nuevos.length) {
+    previo.rastro.push(...nuevos);
+    Object.assign(previo.s, { x: S.x, y: S.y, pasos: S.pasos, metros: S.metros });
+  }
+  previo.ajustes = G.ajustes;
+  usar(previo);
+  aviso("Se deshizo la última acción.");
+  hecho();
 }
 
-function copiar() {
-  navigator.clipboard.writeText(csv()).then(
-    () => { $("#ultima").textContent = `${estado.marcas.length} marcas copiadas. Pégalas donde las necesites.`; },
-    () => { $("#ultima").textContent = "No se pudo copiar; usa Descargar CSV."; },
-  );
+function cercanos(x, y, piso, radio) {
+  if (x === null) return [];
+  return G.nodos
+    .filter(n => n.x !== null && pisoIncluye(n.piso, piso) && !/^-?\d+-/.test(n.piso))
+    .map(n => ({ n, d: Math.hypot(n.x - x, n.y - y) }))
+    .filter(o => o.d <= radio)
+    .sort((a, b) => a.d - b.d);
 }
 
-function descargar() {
+function pedirNodo({ titulo, tipo, vertical = null, punto, piso }) {
+  const dlg = $("#dlg");
+  $("#d-titulo").textContent = titulo;
+  $("#d-vertical").hidden = !vertical;
+  dlg.querySelectorAll(".solo-esc").forEach(el => { el.hidden = vertical !== "escalera"; });
+  dlg.querySelectorAll(".solo-desnivel").forEach(el => { el.hidden = vertical === "elevador" || !vertical; });
+  $("#d-llegada").innerHTML = PISOS.map(p => `<option value="${p}">${NOMBRE_PISO[p]}</option>`).join("");
+  $("#d-llegada").value = String(vertical && vertical !== "rampa" ? Math.min(piso + 1, 4) : piso);
+  ["#d-escalones", "#d-descansos", "#d-desnivel", "#d-nombre", "#d-nota"].forEach(s => { $(s).value = ""; });
+  $("#d-tipo").innerHTML = ["V_PCI", "V_PCE", "V_EYS", "V_ELC"].map(t => `<option value="${t}">${NOMBRE_TIPO[t]}</option>`).join("");
+  $("#d-tipo").value = tipo;
+  $("#d-edificio").innerHTML = $("#edificio").innerHTML;
+  $("#d-edificio").value = String(S.edificio);
+  const lista = () => {
+    const p = vertical ? +$("#d-llegada").value : piso;
+    const cerca = cercanos(punto[0], punto[1], p, RADIO_PX);
+    $("#d-lista").innerHTML = `<label class="opcion"><input type="radio" name="d-sel" value="" checked> Nodo nuevo</label>`
+      + cerca.map(({ n, d }) => `<label class="opcion"><input type="radio" name="d-sel" value="${esc(n.id)}"><span>${esc(n.label)}<br><small>${esc(n.id)} · ${NOMBRE_TIPO[n.tipo]} · ${(d * M_PX).toFixed(0)} m</small></span></label>`).join("");
+    $("#d-lista").querySelectorAll("input").forEach(i => i.addEventListener("change", () => { $("#d-nuevo").hidden = !!dlg.querySelector('input[name="d-sel"]:checked').value; }));
+    $("#d-nuevo").hidden = false;
+  };
+  $("#d-llegada").onchange = lista;
+  lista();
+  dlg.returnValue = "";
+  dlg.showModal();
+  return new Promise(resuelve => {
+    dlg.addEventListener("close", () => {
+      if (dlg.returnValue !== "ok") { resuelve(null); return; }
+      const num = s => { const v = parseFloat($(s).value); return Number.isFinite(v) ? v : null; };
+      const nombre = $("#d-nombre").value.trim();
+      const tipoN = $("#d-tipo").value;
+      const edificio = +$("#d-edificio").value;
+      const nota = $("#d-nota").value.trim();
+      resuelve({
+        reusar: dlg.querySelector('input[name="d-sel"]:checked').value || null,
+        tipo: tipoN, label: nombre, edificio,
+        notas: tipoN === "V_EYS" ? [`entrada de ${edificioDe(edificio).nombre}`, nota].filter(Boolean).join("; ") : nota,
+        llegada: +$("#d-llegada").value, escalones: num("#d-escalones"), descansos: num("#d-descansos"), desnivel: num("#d-desnivel"),
+      });
+    }, { once: true });
+  });
+}
+
+function csvCampo(v) {
+  const s = v === null || v === undefined ? "" : String(v);
+  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+function csvTabla(campos, filas) {
+  return [campos.join(","), ...filas.map(f => campos.map(c => csvCampo(f[c])).join(","))].join("\n") + "\n";
+}
+function numeroCsv(v) { return v === null || v === undefined || v === "" ? "" : r1(v).toFixed(1); }
+function csvNodos() {
+  return csvTabla(["id", "label", "tipo", "piso", "lugar_id", "x", "y", "notas"],
+    G.nodos.map(n => ({ ...n, x: numeroCsv(n.x), y: numeroCsv(n.y) })));
+}
+function csvAristas() {
+  return csvTabla(["origen", "destino", "tipo_arista", "longitud_m", "desnivel_m", "n_escalones", "notas", "recta_m", "gps_m", "gps_precision_m"],
+    G.aristas.map(a => {
+      const o = nodo(a.origen), d = nodo(a.destino);
+      const recta = o && d && o.x !== null && d.x !== null ? (Math.hypot(o.x - d.x, o.y - d.y) * M_PX).toFixed(1) : "";
+      return { ...a, recta_m: recta };
+    }));
+}
+function csvRastro() {
+  return csvTabla(["recorrido", "t_iso", "evento", "piso", "tramo_id", "tipo_tramo", "pasos", "metros", "rumbo_mag", "rumbo_verdadero", "x_crudo", "y_crudo", "x", "y", "nodo_id", "lat", "lon", "precision_m"], G.rastro);
+}
+function bajar(nombre, texto, tipo) {
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob(["﻿" + csv()], { type: "text/csv;charset=utf-8" }));
-  a.download = `marcas_${new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-")}.csv`;
+  a.href = URL.createObjectURL(new Blob([texto], { type: tipo }));
+  a.download = nombre;
+  document.body.append(a);
   a.click();
+  a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
+function exportarCsv(cual) {
+  const texto = { nodos: csvNodos, aristas: csvAristas, rastro: csvRastro }[cual]();
+  bajar(`${cual}_${fecha()}.csv`, "﻿" + texto, "text/csv;charset=utf-8");
+}
+function respaldo() {
+  guardarYa();
+  bajar(`recorridos-fc_${fecha()}.json`, JSON.stringify(G), "application/json");
+}
+function importar(texto) {
+  let g;
+  try { g = JSON.parse(texto); } catch (e) { aviso("El archivo no es un JSON válido."); return false; }
+  if (!g || !Array.isArray(g.nodos) || !Array.isArray(g.aristas) || !Array.isArray(g.rastro) || !g.s) {
+    aviso("El archivo no es un respaldo de esta app.");
+    return false;
+  }
+  recordar();
+  usar(Object.assign(grafoVacio(), g));
+  aviso(`Respaldo importado: ${G.nodos.length} nodos y ${G.aristas.length} aristas.`);
+  hecho();
+  return true;
+}
 
-$("#edificio").addEventListener("change", () => { pintarSalones(); siguienteSinMarcar(); });
-$("#siguiente").addEventListener("click", siguienteSinMarcar);
-$("#marcar").addEventListener("click", marcar);
-$("#iniciar").addEventListener("click", iniciar);
-$("#nuevo").addEventListener("click", nuevo);
-$("#calibrar").addEventListener("click", calibrar);
-$("#copiar").addEventListener("click", copiar);
-$("#sincronizar").addEventListener("click", sincronizar);
-$("#donde-puerta").addEventListener("click", () => {
-  estado.donde = "puerta";
-  $("#donde-puerta").setAttribute("aria-pressed", "true");
-  $("#donde-dentro").setAttribute("aria-pressed", "false");
-});
-$("#donde-dentro").addEventListener("click", () => {
-  estado.donde = "dentro";
-  $("#donde-dentro").setAttribute("aria-pressed", "true");
-  $("#donde-puerta").setAttribute("aria-pressed", "false");
-});
-document.addEventListener("visibilitychange", () => { if (estado.activo && document.visibilityState === "visible") mantenerPantalla(); });
+function migrarV2() {
+  let viejas = [];
+  try { viejas = JSON.parse(localStorage.getItem(LLAVE_V2) || "[]"); } catch (e) {}
+  try { const z = parseFloat(localStorage.getItem(`${LLAVE_V2}-zancada`)); if (z > 0) G.ajustes.zancada = z; } catch (e) {}
+  for (const m of viejas) {
+    const e = CATALOGO.find(x => x.id === m.edificio_id);
+    const l = e && e.lugares.find(x => x.id === m.lugar_id);
+    if (!l) continue;
+    const id = idLugar(e, l);
+    if (nodo(id)) continue;
+    G.nodos.push({
+      id, label: l.nombre, tipo: "V_S", piso: String(l.piso), lugar_id: lugarIdDe(l), x: null, y: null,
+      notas: `marca v2 ${m.ts}; ${m.metros_desde_anterior} m desde ${m.desde}`, recorrido: m.recorrido, rastro: -1,
+    });
+  }
+  if (viejas.length) aviso(`Se recuperaron ${G.nodos.length} lugares marcados con la versión anterior (sin posición en el mapa).`);
+}
 
-try { const z = localStorage.getItem(`${LLAVE}-zancada`); if (z) $("#zancada").value = z; } catch (e) {}
-estado.marcas = leer();
-pintarEdificios();
-pintarSalones();
-pintarMarcas();
-pintarRuta();
+function pedirDibujo() {
+  if (R.dibujo) return;
+  R.dibujo = true;
+  requestAnimationFrame(() => { R.dibujo = false; pintarMapa(); pintarEstado(); });
+}
+function ajustarVista() {
+  const caja = $("#mapa").getBoundingClientRect();
+  const v = R.vista;
+  v.h = v.w * (caja.height / Math.max(caja.width, 1));
+  $("#mapa").setAttribute("viewBox", `${v.x} ${v.y} ${v.w} ${v.h}`);
+}
+function centrar() {
+  if (S.x === null) return;
+  const v = R.vista;
+  v.w = Math.min(v.w, 260);
+  ajustarVista();
+  v.x = S.x - v.w / 2; v.y = S.y - v.h / 2;
+  ajustarVista();
+  pintarMapa();
+}
+function pintarMapa() {
+  const f = S.filtro;
+  const ver = p => f === "todos" || pisoIncluye(p, f);
+  const rad = R.vista.w / 190;
+  const partes = [];
+  for (const a of G.aristas) {
+    const o = nodo(a.origen), d = nodo(a.destino);
+    if (!o || !d || o.x === null || d.x === null) continue;
+    partes.push(`<line class="arista${ver(o.piso) || ver(d.piso) ? "" : " tenue"}" x1="${o.x}" y1="${o.y}" x2="${d.x}" y2="${d.y}"/>`);
+  }
+  let tramo = [], pisoTramo = null;
+  const cerrar = () => {
+    if (tramo.length > 1) partes.push(`<polyline class="rastro${ver(pisoTramo) ? "" : " tenue"}" stroke="${COLOR_PISO[pisoTramo] || "#333"}" points="${tramo.join(" ")}"/>`);
+    tramo = [];
+  };
+  for (const row of G.rastro) {
+    if (row.recorrido !== S.recorrido || row.x === null) continue;
+    if (row.evento === "descarte" || row.piso !== pisoTramo) {
+      const ultimo = row.piso !== pisoTramo && row.evento !== "descarte" ? tramo.at(-1) : null;
+      cerrar();
+      if (ultimo) tramo.push(ultimo);
+      pisoTramo = row.piso;
+    }
+    tramo.push(`${row.x},${row.y}`);
+    if (row.evento === "ancla") partes.push(`<rect class="ancla" x="${row.x - rad}" y="${row.y - rad}" width="${2 * rad}" height="${2 * rad}" transform="rotate(45 ${row.x} ${row.y})"/>`);
+  }
+  cerrar();
+  for (const n of G.nodos) {
+    if (n.x === null) continue;
+    const r = n.tipo === "V_S" ? rad * 1.3 : rad;
+    partes.push(`<circle class="nodo${ver(n.piso) ? "" : " tenue"}" cx="${n.x}" cy="${n.y}" r="${r}" fill="${COLOR_TIPO[n.tipo]}"><title>${esc(n.label)} (${esc(n.id)})</title></circle>`);
+    if (n.tipo === "V_S" && ver(n.piso) && R.vista.w < 180) partes.push(`<text x="${n.x + r * 1.4}" y="${n.y - r * 1.4}" style="font-size:${rad * 2.2}px">${esc(n.label)}</text>`);
+  }
+  if (R.fix && R.gps !== null) {
+    const ok = R.fix.precision <= GPS_ANCLA_M;
+    partes.push(`<circle class="gps${ok ? " ok" : ""}" cx="${r1(R.fix.x)}" cy="${r1(R.fix.y)}" r="${r1(R.fix.precision / M_PX)}"/>`);
+    partes.push(`<circle class="gps-punto" cx="${r1(R.fix.x)}" cy="${r1(R.fix.y)}" r="${rad * 0.8}"/>`);
+  }
+  if (S.x !== null) {
+    if (R.rumbo !== null) {
+      const h = (R.rumbo + G.ajustes.declinacion) * Math.PI / 180;
+      const [dx, dy] = avancePx(Math.sin(h), Math.cos(h));
+      const k = rad * 4 / Math.hypot(dx, dy);
+      partes.push(`<line class="rumbo" x1="${S.x}" y1="${S.y}" x2="${S.x + dx * k}" y2="${S.y + dy * k}"/>`);
+    }
+    partes.push(`<circle class="yo" cx="${S.x}" cy="${S.y}" r="${rad * 1.5}"/>`);
+  }
+  $("#capa").innerHTML = partes.join("");
+}
+
+function pintarEstado() {
+  $("#c-piso").textContent = NOMBRE_PISO[S.piso];
+  if (S.tramo) {
+    const m = medidaTramo();
+    $("#c-tramo").textContent = `${TRAMOS[S.tramo.tipo].nombre} · ${S.tramo.tipo === "elevador" ? "—" : `${r1(m.metros).toFixed(1)} m`}`;
+  } else $("#c-tramo").textContent = "sin tramo";
+  $("#c-rumbo").textContent = R.rumbo === null ? "sin rumbo" : `rumbo ${Math.round((R.rumbo + G.ajustes.declinacion + 360) % 360)}°`;
+  const s = $("#c-sensores");
+  if (!R.activo) { s.className = "chip"; s.textContent = "en pausa"; }
+  else if (!R.lecturas) { s.className = "chip regular"; s.textContent = "esperando sensores"; }
+  else if (R.rumbo === null) { s.className = "chip mal"; s.textContent = "sin brújula"; }
+  else { s.className = "chip bien"; s.textContent = `${S.pasos} pasos`; }
+  const g = $("#c-gps");
+  g.hidden = R.gps === null;
+  if (!R.fix) { g.className = "chip regular"; g.textContent = "GPS buscando"; }
+  else { g.className = `chip ${R.fix.precision <= GPS_ANCLA_M ? "bien" : R.fix.precision <= GPS_ARISTA_M ? "regular" : "mal"}`; g.textContent = `GPS ±${Math.round(R.fix.precision)} m`; }
+  $("#b-gps").hidden = !gpsUsable();
+  $("#tramos").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(!!S.tramo && S.tramo.tipo === b.dataset.tipo)));
+  $("#pisos").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.piso === S.piso)));
+  $("#lugar-pie").textContent = S.tramo ? (TRAMOS[S.tramo.tipo].vertical ? "termina el tramo vertical primero" : "toca en la puerta") : "inicia el recorrido primero";
+}
+function pintarLugares() {
+  const e = edificioDe($("#edificio").value);
+  const previo = $("#lugar").value;
+  const hechos = new Set(G.nodos.map(n => n.id));
+  $("#lugar").innerHTML = e.lugares.map(l => `<option value="${esc(l.id)}">${hechos.has(idLugar(e, l)) ? "✓ " : ""}${esc(l.nombre)} · ${esc(l.nivel)}</option>`).join("");
+  if (e.lugares.some(l => String(l.id) === previo)) $("#lugar").value = previo;
+}
+function siguienteSinMarcar() {
+  const e = edificioDe($("#edificio").value);
+  const hechos = new Set(G.nodos.map(n => n.id));
+  const pendiente = e.lugares.find(l => !hechos.has(idLugar(e, l)) && l.piso === S.piso) || e.lugares.find(l => !hechos.has(idLugar(e, l)));
+  if (pendiente) $("#lugar").value = String(pendiente.id);
+}
+function pintarVia() {
+  const lista = G.nodos.filter(n => n.x !== null && pisoIncluye(n.piso, S.piso))
+    .map(n => ({ n, d: S.x === null ? 0 : Math.hypot(n.x - S.x, n.y - S.y) })).sort((a, b) => a.d - b.d).slice(0, 40);
+  $("#via").innerHTML = lista.map(({ n, d }) => `<option value="${esc(n.id)}">${esc(n.label)} · ${(d * M_PX).toFixed(0)} m</option>`).join("");
+}
+function pintarUltimos() {
+  const nodos = G.nodos.slice(-5).reverse().map(n => `<li>${esc(n.label)} <small>${esc(n.id)} · ${NOMBRE_TIPO[n.tipo]} · piso ${esc(n.piso)}</small></li>`);
+  const aristas = G.aristas.slice(-5).reverse().map(a => `<li>${esc(a.origen)} → ${esc(a.destino)} <small>${esc(a.tipo_arista)} · ${a.longitud_m === "" ? "sin longitud" : `${a.longitud_m} m`}</small></li>`);
+  $("#ultimos").innerHTML = [...aristas, ...nodos].join("") || '<li class="nota">Todavía no hay registros.</li>';
+  $("#conteo").textContent = `${G.nodos.length} nodos · ${G.aristas.length} aristas · ${G.rastro.length} filas de rastro`;
+}
+function pintarTodo() {
+  pintarLugares();
+  pintarUltimos();
+  if (!$("#via").hidden) pintarVia();
+  $("#zancada").value = zancada().toFixed(2);
+  $("#umbral").value = G.ajustes.umbral;
+  $("#declinacion").value = G.ajustes.declinacion;
+  $("#filtro").value = S.filtro;
+  pintarMapa();
+  pintarEstado();
+}
+
+function calibrar() {
+  if (!R.activo || !S.tramo) { aviso("Inicia el recorrido antes de calibrar."); return; }
+  const conocida = parseFloat($("#conocida").value) || 10;
+  if (R.calibrando === null) {
+    R.calibrando = S.pasos;
+    $("#b-calibrar").textContent = "Terminar calibración";
+    aviso(`Camina los ${conocida} m y toca Terminar calibración.`);
+    return;
+  }
+  const n = S.pasos - R.calibrando;
+  R.calibrando = null;
+  $("#b-calibrar").textContent = "Calibrar";
+  if (n < 3) { aviso("Contó muy pocos pasos; baja la sensibilidad y repite."); return; }
+  G.ajustes.zancada = r2(conocida / n);
+  aviso(`${n} pasos en ${conocida} m: tu paso mide ${G.ajustes.zancada.toFixed(2)} m.`);
+  hecho();
+}
+
+function montarMapa() {
+  const svg = $("#mapa");
+  const puntos = new Map();
+  let gesto = null;
+  const aMapa = (cx, cy) => {
+    const p = new DOMPoint(cx, cy).matrixTransform(svg.getScreenCTM().inverse());
+    return [p.x, p.y];
+  };
+  const zoom = (factor, cx, cy) => {
+    const v = R.vista;
+    const [mx, my] = aMapa(cx, cy);
+    const w = Math.min(1600, Math.max(40, v.w * factor));
+    const k = w / v.w;
+    v.x = mx - (mx - v.x) * k; v.y = my - (my - v.y) * k; v.w = w;
+    ajustarVista();
+  };
+  svg.addEventListener("pointerdown", ev => {
+    svg.setPointerCapture(ev.pointerId);
+    puntos.set(ev.pointerId, [ev.clientX, ev.clientY]);
+    gesto = puntos.size === 1 ? { x: ev.clientX, y: ev.clientY, t: Date.now(), movio: false } : null;
+  });
+  svg.addEventListener("pointermove", ev => {
+    if (!puntos.has(ev.pointerId)) return;
+    const antes = [...puntos.values()];
+    puntos.set(ev.pointerId, [ev.clientX, ev.clientY]);
+    const ahora = [...puntos.values()];
+    const escala = R.vista.w / svg.getBoundingClientRect().width;
+    if (ahora.length === 1) {
+      const [dx, dy] = [ahora[0][0] - antes[0][0], ahora[0][1] - antes[0][1]];
+      if (gesto && Math.hypot(ev.clientX - gesto.x, ev.clientY - gesto.y) > 10) gesto.movio = true;
+      if (gesto && !gesto.movio) return;
+      R.vista.x -= dx * escala; R.vista.y -= dy * escala;
+      ajustarVista();
+    } else if (ahora.length === 2) {
+      const d0 = Math.hypot(antes[0][0] - antes[1][0], antes[0][1] - antes[1][1]);
+      const d1 = Math.hypot(ahora[0][0] - ahora[1][0], ahora[0][1] - ahora[1][1]);
+      const cx = (ahora[0][0] + ahora[1][0]) / 2, cy = (ahora[0][1] + ahora[1][1]) / 2;
+      const px = (antes[0][0] + antes[1][0]) / 2, py = (antes[0][1] + antes[1][1]) / 2;
+      R.vista.x -= (cx - px) * escala; R.vista.y -= (cy - py) * escala;
+      if (d1 > 0) zoom(d0 / d1, cx, cy);
+    }
+    pedirDibujo();
+  });
+  const soltar = ev => {
+    if (!puntos.has(ev.pointerId)) return;
+    puntos.delete(ev.pointerId);
+    if (gesto && !gesto.movio && puntos.size === 0 && Date.now() - gesto.t < 600 && ev.type === "pointerup") {
+      const [x, y] = aMapa(ev.clientX, ev.clientY);
+      alTocarMapa(x, y);
+    }
+    gesto = null;
+  };
+  svg.addEventListener("pointerup", soltar);
+  svg.addEventListener("pointercancel", soltar);
+  svg.addEventListener("wheel", ev => { ev.preventDefault(); zoom(ev.deltaY > 0 ? 1.15 : 1 / 1.15, ev.clientX, ev.clientY); pedirDibujo(); }, { passive: false });
+  window.addEventListener("resize", () => { ajustarVista(); pedirDibujo(); });
+}
+
+function montar() {
+  $("#tramos").innerHTML = Object.entries(TRAMOS).map(([k, t]) => `<button type="button" data-tipo="${k}" aria-pressed="false">${t.nombre}</button>`).join("");
+  $("#pisos").innerHTML = PISOS.map(p => `<button type="button" data-piso="${p}" aria-pressed="false">${p === -1 ? "S" : p === 0 ? "PB" : p}</button>`).join("");
+  $("#filtro").innerHTML = `<option value="todos">Todos los pisos</option>` + PISOS.map(p => `<option value="${p}">${NOMBRE_PISO[p]}</option>`).join("");
+  $("#edificio").innerHTML = CATALOGO.map(e => `<option value="${e.id}">${e.mapa} · ${esc(e.nombre)} (${e.lugares.length})</option>`).join("");
+  $("#edificio").value = String(S.edificio);
+  $("#tramos").addEventListener("click", ev => { const b = ev.target.closest("button"); if (b) cambiarTramo(b.dataset.tipo); });
+  $("#pisos").addEventListener("click", ev => {
+    const b = ev.target.closest("button");
+    if (!b) return;
+    recordar();
+    S.piso = +b.dataset.piso;
+    siguienteSinMarcar();
+    hecho();
+  });
+  $("#edificio").addEventListener("change", () => { S.edificio = +$("#edificio").value; pintarLugares(); siguienteSinMarcar(); guardar(); });
+  $("#via-activa").addEventListener("change", () => { $("#via").hidden = !$("#via-activa").checked; if (!$("#via").hidden) pintarVia(); });
+  $("#filtro").addEventListener("change", () => { S.filtro = $("#filtro").value; guardar(); pintarMapa(); });
+  $("#b-iniciar").addEventListener("click", iniciar);
+  $("#b-deshacer").addEventListener("click", deshacer);
+  $("#b-aqui").addEventListener("click", () => {
+    if (!S.tramo) { aviso("Primero toca Iniciar y marca en el mapa dónde estás."); return; }
+    if (R.modo === "ancla") ponerModo(null); else ponerModo("ancla", "Toca en el mapa dónde estás realmente");
+  });
+  $("#b-centrar").addEventListener("click", centrar);
+  $("#b-gps").addEventListener("click", anclarConGps);
+  $("#b-lugar").addEventListener("click", marcarLugar);
+  $("#b-punto").addEventListener("click", puntoAqui);
+  $("#b-descartar").addEventListener("click", descartar);
+  $("#b-calibrar").addEventListener("click", calibrar);
+  $("#b-nuevo").addEventListener("click", () => {
+    recordar();
+    S.tramo = null; S.x = null; S.y = null; S.ancla = -1; S.pasos = 0; S.metros = 0;
+    ponerModo("inicio", "Toca en el mapa dónde estás parado");
+    aviso("Recorrido nuevo: toca en el mapa dónde estás. Los nodos de días anteriores siguen en el grafo y se pueden reusar.");
+    hecho();
+  });
+  for (const [sel, campo, min] of [["#zancada", "zancada", 0.2], ["#umbral", "umbral", 0.1], ["#declinacion", "declinacion", -90]]) {
+    $(sel).addEventListener("change", () => {
+      const v = parseFloat($(sel).value);
+      if (Number.isFinite(v) && v >= min) { G.ajustes[campo] = v; guardarYa(); }
+      pintarTodo();
+    });
+  }
+  document.querySelectorAll("[data-csv]").forEach(b => b.addEventListener("click", () => exportarCsv(b.dataset.csv)));
+  $("#b-respaldo").addEventListener("click", respaldo);
+  $("#b-importar").addEventListener("click", () => $("#archivo").click());
+  $("#archivo").addEventListener("change", async () => {
+    const f = $("#archivo").files[0];
+    if (f) importar(await f.text());
+    $("#archivo").value = "";
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") guardarYa();
+    else if (R.activo) mantenerPantalla();
+  });
+  montarMapa();
+}
+
+let guardadoPrevio = null;
+try { guardadoPrevio = JSON.parse(localStorage.getItem(LLAVE) || "null"); } catch (e) {}
+usar(guardadoPrevio ? Object.assign(grafoVacio(), guardadoPrevio) : grafoVacio());
+if (!guardadoPrevio) migrarV2();
+montar();
+ajustarVista();
+if (S.x !== null) centrar();
+pintarTodo();
 siguienteSinMarcar();
-$("#descargar").addEventListener("click", descargar);
-$("#sincronizar").hidden = !window.claude;
-$("#descargar").hidden = !!window.claude;
-pedirDb().then(db => { estado.db = db; if (db) sincronizar(); });
+if (S.tramo) $("#b-iniciar").textContent = "Reanudar";
+if (S.tramo) aviso(`Recorrido en curso: ${TRAMOS[S.tramo.tipo].nombre.toLowerCase()} desde ${nodo(S.tramo.inicio).label}. Toca Reanudar para volver a contar pasos.`);
 </script>
+</body>
+</html>
